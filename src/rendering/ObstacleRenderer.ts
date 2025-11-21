@@ -15,20 +15,6 @@ import ruinsBrick1 from '../assets/PNG/Objects/ruins_brick1.png';
 import castleLarge from '../assets/PNG/Objects/castle_large.png';
 import church from '../assets/PNG/Objects/church.png';
 
-/*
-
-      'src/assets/PNG/Objects/rockGrey_large.png',
-      'src/assets/PNG/Objects/rockBrown_large.png',
-      'src/assets/PNG/Objects/rockGrey_small1.png',
-      'src/assets/PNG/Objects/rockGrey_small2.png',
-      'src/assets/PNG/Objects/rockGrey_small3.png',
-      'src/assets/PNG/Objects/treePine_large.png',
-      'src/assets/PNG/Objects/treeRound_large.png',
-      'src/assets/PNG/Objects/ruinsCorner.png',
-      'src/assets/PNG/Objects/ruins_brick1.png',
-      'src/assets/PNG/Objects/castle_large.png',
-      'src/assets/PNG/Objects/church.png'
-*/
 
 /**
  * ObstacleRenderer - Renders obstacles on the battlefield

@@ -11,6 +11,10 @@ import { AIService } from '../services/AIService';
 import { SoundService } from '../services/SoundService';
 import { WeaponType } from '../utils/Constants';
 import { Logger } from '../utils/Logger';
+import weaponFireSound from '../assets/sound/ES_Medieval, GUI, Select, Archery  - attack sound- Epidemic Sound.mp3';
+import backgroundMusic from '../assets/sound/main-theme.mp3';
+import moveSound from '../assets/sound/Machine MOVING SOUND.wav';
+import loseSound from '../assets/sound/lose sound.mp3';
 
 export class GameEngine {
   public gameState: GameState;
@@ -31,10 +35,10 @@ export class GameEngine {
     
     // Initialize sound service
     this.soundService = new SoundService({
-      weaponFireUrl: '/src/assets/sound/ES_Medieval, GUI, Select, Archery  - attack sound- Epidemic Sound.mp3',
-      backgroundMusicUrl: '/src/assets/sound/main-theme.mp3',
-      moveSoundUrl: '/src/assets/sound/Machine MOVING SOUND.wav',
-      loseSoundUrl: '/src/assets/sound/lose sound.mp3',
+      weaponFireUrl: weaponFireSound,
+      backgroundMusicUrl: backgroundMusic,
+      moveSoundUrl: moveSound,
+      loseSoundUrl: loseSound,
       defaultSfxVolume: 0.7,
       defaultMusicVolume: 0.5
     });
