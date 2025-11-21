@@ -662,10 +662,13 @@ body {
   
   .bottom-panel {
     height: 70px;
+    margin-bottom: 50px;
   }
   
   .menu-container {
+    margin-top: -100px;
     padding: 12px;
+    max-height: 80vh;
   }
   
   #xp-value {
