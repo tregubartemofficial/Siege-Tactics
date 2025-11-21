@@ -68,6 +68,8 @@ export class UIController {
 
     // Game Events
     this.eventBus.on('gameEnded', this.handleGameEnded.bind(this));
+    this.eventBus.on('playerTurnStarted', () => this.updateTurnIndicator('player'));
+    this.eventBus.on('aiTurnStarted', () => this.updateTurnIndicator('ai'));
   }
 
   public showMainMenu(progress: PlayerProgress): void {

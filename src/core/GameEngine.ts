@@ -108,6 +108,12 @@ export class GameEngine {
   private async handleAITurnStarted(): Promise<void> {
     Logger.info('AI turn starting...');
     
+    // Update UI
+    const uiController = (window as any).siegeTactics?.uiController;
+    if (uiController) {
+      uiController.updateTurnIndicator('ai');
+    }
+    
     // Disable player input during AI turn
     this.gameState.isAnimating = true;
     
@@ -130,6 +136,12 @@ export class GameEngine {
   private handlePlayerTurnStarted(): void {
     Logger.info('Player turn started');
     this.gameState.isAnimating = false;
+    
+    // Update UI
+    const uiController = (window as any).siegeTactics?.uiController;
+    if (uiController) {
+      uiController.updateTurnIndicator('player');
+    }
   }
 
   private delay(ms: number): Promise<void> {

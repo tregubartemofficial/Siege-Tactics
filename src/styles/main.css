@@ -217,16 +217,25 @@ body {
   font-weight: bold;
   padding: 8px 16px;
   border-radius: 4px;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .turn-indicator.player {
   background: #4A7C9D;
   color: white;
+  border: 2px solid #6B9DC0;
 }
 
 .turn-indicator.ai {
   background: #C24641;
   color: white;
+  border: 2px solid #E05D57;
 }
 
 .xp-counter {

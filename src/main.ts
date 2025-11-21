@@ -14,7 +14,7 @@ import './styles/main.css';
 
 class SiegeTactics {
   private gameEngine: GameEngine | null = null;
-  private uiController: UIController;
+  public uiController: UIController;
 
   constructor() {
     Logger.info('Siege Tactics initializing...');
@@ -68,12 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
   (window as any).CombatService = CombatService;
   (window as any).HexUtils = HexUtils;
   
-  Logger.info('=== Combat System Ready! ===');
+  Logger.info('=== Siege Tactics Ready! ===');
+  Logger.info('🎮 GAMEPLAY:');
   Logger.info('1. Start battle: siegeTactics.startBattle("catapult")');
   Logger.info('2. Click your unit (bottom) to select');
-  Logger.info('3. Blue overlay = movement range, Red overlay = attack range');
-  Logger.info('4. Click enemy unit (red, top of map) to attack');
-  Logger.info('5. Hover over hexes to see movement path');
-  Logger.info('6. Combat log shows damage and destruction');
+  Logger.info('3. Blue overlay = movement, Red overlay = attack range');
+  Logger.info('4. Click hex to move, or enemy to attack');
+  Logger.info('5. Click "END TURN" button to let AI play');
+  Logger.info('6. Watch turn indicator (blue=player, red=AI)');
+  Logger.info('7. Destroy all enemies to win!');
 });
 
