@@ -132,16 +132,17 @@ export class ObstacleRenderer {
   }
 
   private hexToIsometricPixel(coord: HexCoordinate): { x: number; y: number } {
-    const x = this.hexSize * 1.5 * coord.q;
-    const y = this.hexSize * Math.sqrt(3) * (coord.r + coord.q / 2);
+    // Must match BattlefieldRenderer exactly!
+    const hexWidth = Math.sqrt(3) * this.hexSize;
+    const hexHeight = this.hexSize * 1.5;
+    const verticalScale = 0.5;
     
-    // Apply isometric projection (60-degree)
-    const isoX = x;
-    const isoY = y * 0.5;
+    const centerX = this.ctx.canvas.width / 2;
+    const centerY = this.ctx.canvas.height / 2;
     
-    return {
-      x: isoX + this.ctx.canvas.width / 2,
-      y: isoY + this.ctx.canvas.height / 2
-    };
+    const x = centerX + hexWidth * (coord.q + coord.r / 2);
+    const y = centerY + hexHeight * coord.r * verticalScale;
+    
+    return { x, y };
   }
 }

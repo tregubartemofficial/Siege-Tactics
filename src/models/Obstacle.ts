@@ -62,11 +62,11 @@ export class Obstacle {
   private getScale(type: ObstacleType): number {
     // Scale relative to hex size
     switch(type) {
-      case 'ROCK_LARGE': return 0.8;
+      case 'ROCK_LARGE': return 0.5;
       case 'ROCK_SMALL': return 0.5;
       case 'TREE': return 0.9;
       case 'RUIN': return 1.0;
-      case 'CASTLE': return 0.8;
+      case 'CASTLE': return 0.5;
       case 'CHURCH': return 0.7;
       default: return 0.7;
     }
