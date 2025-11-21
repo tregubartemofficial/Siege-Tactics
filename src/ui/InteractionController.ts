@@ -21,9 +21,15 @@ export class InteractionController {
   }
 
   private setupEventListeners(): void {
+    // Mouse events
     this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
     this.canvas.addEventListener('click', this.handleClick.bind(this));
     this.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+    
+    // Touch events for mobile
+    this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+    this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+    this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
   }
 
   private handleMouseMove(event: MouseEvent): void {
@@ -43,6 +49,96 @@ export class InteractionController {
   }
 
   private handleMouseLeave(): void {
+    this.gameState.hoveredHex = null;
+  }
+
+  private handleTouchStart(event: TouchEvent): void {
+    event.preventDefault();
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      const rect = this.canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left - this.canvas.width / 2;
+      const y = touch.clientY - rect.top - this.canvas.height / 2;
+      
+      const hex = this.pixelToIsometricHex(x, y);
+      if (HexUtils.inBounds(hex, this.gameState.shrinkRadius)) {
+        this.gameState.hoveredHex = hex;
+      }
+    }
+  }
+
+  private handleTouchMove(event: TouchEvent): void {
+    event.preventDefault();
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      const rect = this.canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left - this.canvas.width / 2;
+      const y = touch.clientY - rect.top - this.canvas.height / 2;
+      
+      const hex = this.pixelToIsometricHex(x, y);
+      if (HexUtils.inBounds(hex, this.gameState.shrinkRadius)) {
+        this.gameState.hoveredHex = hex;
+      } else {
+        this.gameState.hoveredHex = null;
+      }
+    }
+  }
+
+  private handleTouchEnd(event: TouchEvent): void {
+    event.preventDefault();
+    if (event.changedTouches.length === 1) {
+      const touch = event.changedTouches[0];
+      const rect = this.canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left - this.canvas.width / 2;
+      const y = touch.clientY - rect.top - this.canvas.height / 2;
+      
+      const hex = this.pixelToIsometricHex(x, y);
+      
+      if (!HexUtils.inBounds(hex, this.gameState.shrinkRadius)) {
+        return;
+      }
+      
+      // Block input during AI turn or animations
+      if (this.gameState.currentTurn !== 'player' || this.gameState.isAnimating) {
+        Logger.info('Wait for AI turn to complete...');
+        return;
+      }
+      
+      // Check if clicking on a player unit
+      const clickedUnit = this.gameState.playerUnits.find(unit =>
+        HexUtils.equals(unit.position, hex)
+      );
+      
+      if (clickedUnit) {
+        // If clicking on already selected unit, deselect it
+        if (this.gameState.selectedUnit && this.gameState.selectedUnit.id === clickedUnit.id) {
+          this.deselectUnit();
+        } else {
+          this.selectUnit(clickedUnit.id);
+        }
+        return;
+      }
+      
+      // If unit is selected, check for attack or movement
+      if (this.gameState.selectedUnit) {
+        // Check if clicking on enemy unit for attack
+        const enemyUnit = CombatService.getEnemyAtHex(
+          hex,
+          this.gameState.selectedUnit,
+          this.gameState
+        );
+        
+        if (enemyUnit) {
+          this.tryAttackUnit(hex);
+          return;
+        }
+        
+        // Otherwise try to move
+        this.tryMoveUnit(hex);
+      }
+    }
+    
+    // Clear hover after touch ends
     this.gameState.hoveredHex = null;
   }
 

@@ -25,6 +25,10 @@ export class Renderer {
     }
     
     this.ctx = context;
+    
+    // Setup responsive canvas size
+    this.resizeCanvas();
+    
     this.battlefieldRenderer = new BattlefieldRenderer(canvas);
     this.obstacleRenderer = new ObstacleRenderer(context, 50); // hexSize = 50
     this.unitRenderer = new UnitRenderer(context, 50, canvas); // hexSize = 50
@@ -32,6 +36,9 @@ export class Renderer {
     
     // Preload obstacle assets
     this.obstacleRenderer.preloadAssets();
+    
+    // Handle window resize
+    window.addEventListener('resize', () => this.resize());
     
     // Handle high-DPI displays
     this.setupHighDPI();
@@ -67,9 +74,26 @@ export class Renderer {
    * Recalculates positioning for all rendering subsystems
    */
   public resize(): void {
+    this.resizeCanvas();
     this.setupHighDPI();
     this.battlefieldRenderer.resize();
     this.unitRenderer.resize(this.canvas);
+  }
+
+  /**
+   * Resize canvas to fit container while maintaining aspect ratio
+   */
+  private resizeCanvas(): void {
+    const container = this.canvas.parentElement;
+    if (!container) return;
+    
+    // Get container dimensions
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // Set canvas size to fill container
+    this.canvas.width = containerWidth;
+    this.canvas.height = containerHeight;
   }
 
   /**

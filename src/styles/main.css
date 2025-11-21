@@ -14,6 +14,10 @@ body {
   background-color: #2C2416;
   color: #E8DCC8;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  touch-action: none; /* Prevent default touch behaviors */
 }
 
 /* Screen Layouts */
@@ -23,6 +27,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 /* Main Menu */
@@ -250,11 +255,18 @@ body {
   justify-content: center;
   align-items: center;
   background: #1A1510;
+  position: relative;
 }
 
 #game-canvas {
   border: 2px solid #8B6F47;
   background: #2C2416;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  touch-action: none;
 }
 
 .bottom-panel {
@@ -508,4 +520,171 @@ body {
 .pause-buttons button.secondary:hover {
   background: #A68A5E;
   transform: translateY(-2px);
+}
+
+/* ========== RESPONSIVE DESIGN - MOBILE ========== */
+
+/* Tablets and smaller laptops */
+@media (max-width: 1024px) {
+  .game-title {
+    font-size: 36px;
+  }
+  
+  .menu-container {
+    padding: 24px;
+    max-width: 90%;
+  }
+  
+  .weapon-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  
+  .top-hud {
+    height: 50px;
+    padding: 0 16px;
+  }
+  
+  .turn-indicator {
+    font-size: 18px;
+    padding: 6px 12px;
+  }
+  
+  .bottom-panel {
+    height: 100px;
+    padding: 12px 16px;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .game-title {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+  
+  .menu-container {
+    padding: 16px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .weapon-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .weapon-card {
+    padding: 12px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    margin: 4px;
+  }
+  
+  .top-hud {
+    height: 45px;
+    padding: 0 12px;
+    flex-wrap: wrap;
+  }
+  
+  .turn-indicator {
+    font-size: 14px;
+    padding: 4px 8px;
+  }
+  
+  .xp-counter {
+    font-size: 14px;
+  }
+  
+  .btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .bottom-panel {
+    height: 80px;
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .unit-info {
+    font-size: 12px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .action-buttons button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  /* Make pause menu more mobile-friendly */
+  .pause-panel {
+    padding: 32px 24px;
+    min-width: 90%;
+  }
+  
+  .pause-panel h2 {
+    font-size: 24px;
+  }
+  
+  .pause-buttons button {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .game-title {
+    font-size: 24px;
+  }
+  
+  .top-hud {
+    height: 40px;
+  }
+  
+  .turn-indicator {
+    font-size: 12px;
+  }
+  
+  .bottom-panel {
+    height: 70px;
+  }
+  
+  .menu-container {
+    padding: 12px;
+  }
+  
+  #xp-value {
+    font-size: 18px;
+  }
+}
+
+/* Landscape mode on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .top-hud {
+    height: 35px;
+  }
+  
+  .bottom-panel {
+    height: 60px;
+  }
+  
+  .menu-container {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
 }
