@@ -42,6 +42,7 @@ export class UIController {
 
     // Battle UI
     document.getElementById('end-turn-btn')?.addEventListener('click', () => {
+      Logger.info('Player ending turn...');
       this.eventBus.emit('turnEnded');
     });
 

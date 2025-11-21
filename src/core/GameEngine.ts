@@ -7,6 +7,7 @@ import { EventBus } from './EventBus';
 import { GameState } from './GameState';
 import { Renderer } from '../rendering/Renderer';
 import { InteractionController } from '../ui/InteractionController';
+import { AIService } from '../services/AIService';
 import { WeaponType } from '../utils/Constants';
 import { Logger } from '../utils/Logger';
 
@@ -15,6 +16,7 @@ export class GameEngine {
   private eventBus: EventBus;
   private renderer: Renderer;
   private interactionController: InteractionController | null = null;
+  private aiService: AIService;
   private animationFrameId: number | null = null;
   private lastFrameTime: number = 0;
 
@@ -22,6 +24,7 @@ export class GameEngine {
     this.eventBus = EventBus.getInstance();
     this.gameState = new GameState();
     this.renderer = new Renderer(canvas);
+    this.aiService = new AIService();
     
     this.setupEventListeners();
     Logger.info('GameEngine initialized');
@@ -31,6 +34,8 @@ export class GameEngine {
     this.eventBus.on('unitSelected', this.handleUnitSelected.bind(this));
     this.eventBus.on('hexClicked', this.handleHexClicked.bind(this));
     this.eventBus.on('turnEnded', this.handleTurnEnded.bind(this));
+    this.eventBus.on('aiTurnStarted', this.handleAITurnStarted.bind(this));
+    this.eventBus.on('playerTurnStarted', this.handlePlayerTurnStarted.bind(this));
   }
 
   public initialize(selectedWeapon: WeaponType): void {
@@ -83,29 +88,52 @@ export class GameEngine {
   }
 
   private handleTurnEnded(): void {
-    Logger.info('Turn ended');
+    Logger.info('Turn ended - current turn: ' + this.gameState.currentTurn);
     
-    if (this.gameState.currentTurn === 'player') {
-      this.gameState.switchTurn('ai');
-      this.eventBus.emit('aiTurnStarted');
-      
-      // AI takes turn after delay
-      setTimeout(() => {
-        this.eventBus.emit('aiTurnExecute');
-        
-        // After AI completes (simulated), switch back
-        setTimeout(() => {
-          this.gameState.switchTurn('player');
-          this.eventBus.emit('playerTurnStarted');
-        }, 1000);
-      }, 500);
+    // Check victory condition before switching turns
+    const victor = this.gameState.checkVictoryCondition();
+    if (victor) {
+      this.handleGameEnd(victor);
+      return;
     }
     
-    // Check victory condition
+    // If player just ended their turn, switch to AI
+    if (this.gameState.currentTurn === 'player') {
+      Logger.info('Switching to AI turn...');
+      this.gameState.switchTurn('ai');
+      this.eventBus.emit('aiTurnStarted');
+    }
+  }
+
+  private async handleAITurnStarted(): Promise<void> {
+    Logger.info('AI turn starting...');
+    
+    // Disable player input during AI turn
+    this.gameState.isAnimating = true;
+    
+    // Small delay before AI acts
+    await this.delay(500);
+    
+    // Execute AI turn
+    await this.aiService.executeTurn(this.gameState);
+    
+    // Re-enable player input
+    this.gameState.isAnimating = false;
+    
+    // Check victory after AI turn
     const victor = this.gameState.checkVictoryCondition();
     if (victor) {
       this.handleGameEnd(victor);
     }
+  }
+
+  private handlePlayerTurnStarted(): void {
+    Logger.info('Player turn started');
+    this.gameState.isAnimating = false;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private handleGameEnd(victor: 'player' | 'ai'): void {

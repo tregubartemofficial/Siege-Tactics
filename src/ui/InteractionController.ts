@@ -57,9 +57,9 @@ export class InteractionController {
       return;
     }
 
-    // Only player can interact during their turn
-    if (this.gameState.currentTurn !== 'player') {
-      Logger.info('Not your turn!');
+    // Block input during AI turn or animations
+    if (this.gameState.currentTurn !== 'player' || this.gameState.isAnimating) {
+      Logger.info('Wait for AI turn to complete...');
       return;
     }
 
