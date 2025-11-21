@@ -42,6 +42,10 @@ export class Renderer {
     
     // Handle high-DPI displays
     this.setupHighDPI();
+    
+    // Update all renderers after initial canvas setup
+    this.battlefieldRenderer.resize();
+    this.unitRenderer.resize(canvas);
   }
 
   /**
@@ -101,8 +105,16 @@ export class Renderer {
     const minWidth = 320;
     const minHeight = 240;
     
-    this.canvas.width = Math.max(containerWidth, minWidth);
-    this.canvas.height = Math.max(containerHeight, minHeight);
+    const finalWidth = Math.max(containerWidth, minWidth);
+    const finalHeight = Math.max(containerHeight, minHeight);
+    
+    // Set canvas dimensions
+    this.canvas.width = finalWidth;
+    this.canvas.height = finalHeight;
+    
+    // Set canvas style dimensions (CSS pixels)
+    this.canvas.style.width = finalWidth + 'px';
+    this.canvas.style.height = finalHeight + 'px';
   }
 
   /**
@@ -113,10 +125,20 @@ export class Renderer {
     const dpr = window.devicePixelRatio || 1;
     
     if (dpr > 1) {
-      const rect = this.canvas.getBoundingClientRect();
-      this.canvas.width = rect.width * dpr;
-      this.canvas.height = rect.height * dpr;
+      // Get current canvas size
+      const width = this.canvas.width;
+      const height = this.canvas.height;
+      
+      // Scale canvas backing store
+      this.canvas.width = width * dpr;
+      this.canvas.height = height * dpr;
+      
+      // Scale context to match
       this.ctx.scale(dpr, dpr);
+      
+      // Keep CSS size unchanged
+      this.canvas.style.width = width + 'px';
+      this.canvas.style.height = height + 'px';
     }
   }
 }
