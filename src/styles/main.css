@@ -367,7 +367,7 @@ body {
 
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  50% { transform: scale(1.02); }
 }
 
 .unlock-icon {
@@ -442,4 +442,70 @@ body {
 .help-content p {
   line-height: 1.6;
   color: #B8AC98;
+}
+
+/* Pause Overlay */
+.pause-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.pause-panel {
+  background: #2C2416;
+  border: 4px solid #8B6F47;
+  border-radius: 8px;
+  padding: 48px 64px;
+  text-align: center;
+  min-width: 400px;
+}
+
+.pause-panel h2 {
+  font-size: 36px;
+  color: #D4AF37;
+  margin-bottom: 32px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.pause-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pause-buttons button {
+  padding: 16px 32px;
+  font-size: 20px;
+  border: 2px solid #8B6F47;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Courier New', monospace;
+}
+
+.pause-buttons button.primary {
+  background: #5A8F3D;
+  color: white;
+}
+
+.pause-buttons button.primary:hover {
+  background: #6FAF4D;
+  transform: translateY(-2px);
+}
+
+.pause-buttons button.secondary {
+  background: #8B6F47;
+  color: #E8DCC8;
+}
+
+.pause-buttons button.secondary:hover {
+  background: #A68A5E;
+  transform: translateY(-2px);
 }

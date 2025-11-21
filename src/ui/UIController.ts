@@ -47,8 +47,18 @@ export class UIController {
     });
 
     document.getElementById('pause-btn')?.addEventListener('click', () => {
-      // TODO: Implement pause functionality
-      Logger.info('Pause clicked');
+      this.showPauseMenu();
+    });
+
+    // Pause menu
+    document.getElementById('resume-btn')?.addEventListener('click', () => {
+      this.hidePauseMenu();
+    });
+
+    document.getElementById('quit-to-menu-btn')?.addEventListener('click', () => {
+      this.hidePauseMenu();
+      (window as any).siegeTactics?.endBattle();
+      this.showMainMenu(ProgressRepository.load());
     });
 
     // Mute button
@@ -226,6 +236,22 @@ export class UIController {
   private hideHelp(): void {
     if (this.helpOverlayEl) {
       this.helpOverlayEl.style.display = 'none';
+    }
+  }
+
+  private showPauseMenu(): void {
+    const pauseOverlay = document.getElementById('pause-overlay');
+    if (pauseOverlay) {
+      pauseOverlay.style.display = 'flex';
+      this.eventBus.emit('gamePaused');
+    }
+  }
+
+  private hidePauseMenu(): void {
+    const pauseOverlay = document.getElementById('pause-overlay');
+    if (pauseOverlay) {
+      pauseOverlay.style.display = 'none';
+      this.eventBus.emit('gameResumed');
     }
   }
 

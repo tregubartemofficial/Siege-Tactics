@@ -59,8 +59,6 @@
         <div class="weapon-stats" id="weapon-stats"></div>
       </div>
       <div class="action-buttons">
-        <button id="move-btn" class="btn action-btn" disabled>MOVE</button>
-        <button id="attack-btn" class="btn action-btn" disabled>ATTACK</button>
         <button id="end-turn-btn" class="btn btn-primary">END TURN</button>
       </div>
     </div>
@@ -99,6 +97,17 @@
       <div class="victory-buttons">
         <button id="rematch-btn" class="btn btn-primary">REMATCH</button>
         <button id="main-menu-btn" class="btn btn-secondary">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Menu Overlay -->
+  <div id="pause-overlay" class="overlay" style="display: none;">
+    <div class="pause-panel">
+      <h2>GAME PAUSED</h2>
+      <div class="pause-buttons">
+        <button id="resume-btn" class="btn btn-primary">RESUME</button>
+        <button id="quit-to-menu-btn" class="btn btn-secondary">QUIT TO MENU</button>
       </div>
     </div>
   </div>

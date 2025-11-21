@@ -21,6 +21,7 @@ export class GameEngine {
   private soundService: SoundService;
   private animationFrameId: number | null = null;
   private lastFrameTime: number = 0;
+  private isPaused: boolean = false;
 
   constructor(canvas: HTMLCanvasElement) {
     this.eventBus = EventBus.getInstance();
@@ -63,6 +64,15 @@ export class GameEngine {
     this.eventBus.on('muteToggled', () => {
       this.soundService.toggleMute();
       this.updateMuteButtonUI();
+    });
+    
+    // Pause/Resume
+    this.eventBus.on('gamePaused', () => {
+      this.pause();
+    });
+    
+    this.eventBus.on('gameResumed', () => {
+      this.resume();
     });
   }
   
@@ -129,7 +139,9 @@ export class GameEngine {
   }
 
   private update(deltaTime: number): void {
-    this.gameState.update(deltaTime);
+    if (!this.isPaused) {
+      this.gameState.update(deltaTime);
+    }
   }
 
   private render(): void {
@@ -227,6 +239,18 @@ export class GameEngine {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+  }
+
+  private pause(): void {
+    this.isPaused = true;
+    this.gameState.isAnimating = true; // Block interactions
+    Logger.info('Game paused');
+  }
+
+  private resume(): void {
+    this.isPaused = false;
+    this.gameState.isAnimating = false; // Re-enable interactions
+    Logger.info('Game resumed');
   }
 
   public getGameState(): GameState {
