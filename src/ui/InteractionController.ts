@@ -4,6 +4,7 @@ import { HexUtils } from '../utils/HexUtils';
 import { PathfindingService } from '../services/PathfindingService';
 import { CombatService } from '../services/CombatService';
 import { Logger } from '../utils/Logger';
+import { EventBus } from '../core/EventBus';
 
 /**
  * InteractionController - Handles mouse/touch input for game interactions
@@ -140,6 +141,9 @@ export class InteractionController {
     unit.hasMovedThisTurn = true;
 
     Logger.info(`Moved ${unit.type} from (${oldPos.q}, ${oldPos.r}) to (${destination.q}, ${destination.r})`);
+
+    // Emit event for move sound
+    EventBus.getInstance().emit('unitMoved', { unitId: unit.id, from: oldPos, to: destination });
 
     // Update fog of war after movement
     this.gameState.updateVision();

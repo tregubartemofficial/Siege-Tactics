@@ -12,6 +12,8 @@
 export interface SoundConfig {
   weaponFireUrl: string;
   backgroundMusicUrl: string;
+  moveSoundUrl: string;
+  loseSoundUrl: string;
   defaultSfxVolume: number;
   defaultMusicVolume: number;
 }
@@ -19,11 +21,15 @@ export interface SoundConfig {
 export class SoundService {
   private weaponFireAudio: HTMLAudioElement | null = null;
   private backgroundMusic: HTMLAudioElement | null = null;
+  private moveAudio: HTMLAudioElement | null = null;
+  private loseAudio: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
   private sfxVolume: number = 0.7; // 70% default volume for sound effects
   private musicVolume: number = 0.5; // 50% default volume for music
   private isLoaded: boolean = false;
   private isMusicLoaded: boolean = false;
+  private isMoveLoaded: boolean = false;
+  private isLoseLoaded: boolean = false;
   private isPlaying: boolean = false;
 
   constructor(private config: SoundConfig) {
@@ -94,6 +100,56 @@ export class SoundService {
     } catch (error) {
       console.warn('[SoundService] Failed to load background music:', error);
       this.isMusicLoaded = false;
+    }
+
+    // Load move sound
+    try {
+      this.moveAudio = new Audio(this.config.moveSoundUrl);
+      this.moveAudio.volume = this.isMuted ? 0 : this.sfxVolume;
+      this.moveAudio.preload = 'auto';
+
+      await new Promise<void>((resolve, reject) => {
+        if (!this.moveAudio) {
+          reject(new Error('Move audio element not created'));
+          return;
+        }
+
+        this.moveAudio.addEventListener('canplaythrough', () => resolve(), { once: true });
+        this.moveAudio.addEventListener('error', (e) => reject(e), { once: true });
+        
+        this.moveAudio.load();
+      });
+
+      this.isMoveLoaded = true;
+      console.log('[SoundService] Move sound loaded successfully');
+    } catch (error) {
+      console.warn('[SoundService] Failed to load move sound:', error);
+      this.isMoveLoaded = false;
+    }
+
+    // Load lose sound
+    try {
+      this.loseAudio = new Audio(this.config.loseSoundUrl);
+      this.loseAudio.volume = this.isMuted ? 0 : this.sfxVolume;
+      this.loseAudio.preload = 'auto';
+
+      await new Promise<void>((resolve, reject) => {
+        if (!this.loseAudio) {
+          reject(new Error('Lose audio element not created'));
+          return;
+        }
+
+        this.loseAudio.addEventListener('canplaythrough', () => resolve(), { once: true });
+        this.loseAudio.addEventListener('error', (e) => reject(e), { once: true });
+        
+        this.loseAudio.load();
+      });
+
+      this.isLoseLoaded = true;
+      console.log('[SoundService] Lose sound loaded successfully');
+    } catch (error) {
+      console.warn('[SoundService] Failed to load lose sound:', error);
+      this.isLoseLoaded = false;
     }
   }
 
@@ -185,6 +241,73 @@ export class SoundService {
     } catch (error) {
       console.warn('[SoundService] Error playing weapon fire sound:', error);
       this.isPlaying = false;
+    }
+  }
+
+  /**
+   * Play move sound when unit moves
+   * Plays only a short snippet (300ms) to match instant tile movement
+   */
+  public playMove(): void {
+    if (this.isMuted || !this.isMoveLoaded || !this.moveAudio) {
+      return;
+    }
+
+    try {
+      // Reset audio to start
+      this.moveAudio.currentTime = 0;
+      
+      // Play the sound
+      const playPromise = this.moveAudio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('[SoundService] Move sound played');
+            
+            // Stop the sound after 300ms to match instant movement
+            setTimeout(() => {
+              if (this.moveAudio) {
+                this.moveAudio.pause();
+                this.moveAudio.currentTime = 0;
+              }
+            }, 300);
+          })
+          .catch((error) => {
+            console.warn('[SoundService] Move playback prevented:', error);
+          });
+      }
+    } catch (error) {
+      console.warn('[SoundService] Error playing move sound:', error);
+    }
+  }
+
+  /**
+   * Play lose sound on defeat screen
+   */
+  public playLose(): void {
+    if (this.isMuted || !this.isLoseLoaded || !this.loseAudio) {
+      return;
+    }
+
+    try {
+      // Reset audio to start
+      this.loseAudio.currentTime = 0;
+      
+      // Play the sound
+      const playPromise = this.loseAudio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('[SoundService] Lose sound played');
+          })
+          .catch((error) => {
+            console.warn('[SoundService] Lose playback prevented:', error);
+          });
+      }
+    } catch (error) {
+      console.warn('[SoundService] Error playing lose sound:', error);
     }
   }
 
@@ -305,8 +428,20 @@ export class SoundService {
       this.backgroundMusic.src = '';
       this.backgroundMusic = null;
     }
+    if (this.moveAudio) {
+      this.moveAudio.pause();
+      this.moveAudio.src = '';
+      this.moveAudio = null;
+    }
+    if (this.loseAudio) {
+      this.loseAudio.pause();
+      this.loseAudio.src = '';
+      this.loseAudio = null;
+    }
     this.isLoaded = false;
     this.isMusicLoaded = false;
+    this.isMoveLoaded = false;
+    this.isLoseLoaded = false;
     this.isPlaying = false;
   }
 }

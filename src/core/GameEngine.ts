@@ -30,8 +30,10 @@ export class GameEngine {
     
     // Initialize sound service
     this.soundService = new SoundService({
-      weaponFireUrl: '/assets/sounds/trebuchet-fire.mp3',
-      backgroundMusicUrl: '/assets/music/River walk.mp3',
+      weaponFireUrl: '/src/assets/sound/ES_Medieval, GUI, Select, Archery  - attack sound- Epidemic Sound.mp3',
+      backgroundMusicUrl: '/src/assets/sound/main-theme.mp3',
+      moveSoundUrl: '/src/assets/sound/Machine MOVING SOUND.wav',
+      loseSoundUrl: '/src/assets/sound/lose sound.mp3',
       defaultSfxVolume: 0.7,
       defaultMusicVolume: 0.5
     });
@@ -51,6 +53,10 @@ export class GameEngine {
     // Sound effects
     this.eventBus.on('attackExecuted', () => {
       this.soundService.playWeaponFire();
+    });
+    
+    this.eventBus.on('unitMoved', () => {
+      this.soundService.playMove();
     });
     
     // Mute toggle
@@ -201,6 +207,12 @@ export class GameEngine {
   private handleGameEnd(victor: 'player' | 'ai'): void {
     Logger.info(`Game ended. Victor: ${victor}`);
     this.stopGameLoop();
+    
+    // Play lose sound if player lost
+    if (victor === 'ai') {
+      this.soundService.playLose();
+    }
+    
     this.eventBus.emit('gameEnded', { victor, state: this.gameState });
   }
 
