@@ -4,6 +4,7 @@ import { GameState } from '../core/GameState';
 import { HexUtils } from '../utils/HexUtils';
 import { CONSTANTS } from '../utils/Constants';
 import { Logger } from '../utils/Logger';
+import { EventBus } from '../core/EventBus';
 
 /**
  * CombatService - Attack Resolution and Damage Calculation
@@ -150,6 +151,14 @@ export class CombatService {
     attacker.hasAttackedThisTurn = true;
     
     Logger.info(`${attacker.type} dealt ${damage} damage to ${target.type} (${targetHealthBefore} → ${target.health} HP)`);
+    
+    // Emit event for sound effect
+    EventBus.getInstance().emit('attackExecuted', {
+      attackerId: attacker.id,
+      targetId: target.id,
+      damage: damage,
+      weaponType: attacker.type
+    });
     
     // Check if target destroyed
     const targetDestroyed = !target.isAlive();

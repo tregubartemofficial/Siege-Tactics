@@ -51,6 +51,11 @@ export class UIController {
       Logger.info('Pause clicked');
     });
 
+    // Mute button
+    document.getElementById('mute-button')?.addEventListener('click', () => {
+      this.eventBus.emit('muteToggled');
+    });
+
     // Victory Screen
     document.getElementById('rematch-btn')?.addEventListener('click', () => {
       (window as any).siegeTactics?.startBattle(this.selectedWeapon);

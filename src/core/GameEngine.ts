@@ -8,6 +8,7 @@ import { GameState } from './GameState';
 import { Renderer } from '../rendering/Renderer';
 import { InteractionController } from '../ui/InteractionController';
 import { AIService } from '../services/AIService';
+import { SoundService } from '../services/SoundService';
 import { WeaponType } from '../utils/Constants';
 import { Logger } from '../utils/Logger';
 
@@ -17,6 +18,7 @@ export class GameEngine {
   private renderer: Renderer;
   private interactionController: InteractionController | null = null;
   private aiService: AIService;
+  private soundService: SoundService;
   private animationFrameId: number | null = null;
   private lastFrameTime: number = 0;
 
@@ -26,7 +28,16 @@ export class GameEngine {
     this.renderer = new Renderer(canvas);
     this.aiService = new AIService();
     
+    // Initialize sound service
+    this.soundService = new SoundService({
+      weaponFireUrl: '/assets/sounds/trebuchet-fire.mp3',
+      backgroundMusicUrl: '/assets/music/River walk.mp3',
+      defaultSfxVolume: 0.7,
+      defaultMusicVolume: 0.5
+    });
+    
     this.setupEventListeners();
+    this.setupKeyboardShortcuts();
     Logger.info('GameEngine initialized');
   }
 
@@ -36,6 +47,42 @@ export class GameEngine {
     this.eventBus.on('turnEnded', this.handleTurnEnded.bind(this));
     this.eventBus.on('aiTurnStarted', this.handleAITurnStarted.bind(this));
     this.eventBus.on('playerTurnStarted', this.handlePlayerTurnStarted.bind(this));
+    
+    // Sound effects
+    this.eventBus.on('attackExecuted', () => {
+      this.soundService.playWeaponFire();
+    });
+    
+    // Mute toggle
+    this.eventBus.on('muteToggled', () => {
+      this.soundService.toggleMute();
+      this.updateMuteButtonUI();
+    });
+  }
+  
+  /**
+   * Setup keyboard shortcuts
+   */
+  private setupKeyboardShortcuts(): void {
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      // M key to toggle mute
+      if (e.key.toLowerCase() === 'm') {
+        this.soundService.toggleMute();
+        this.updateMuteButtonUI();
+      }
+    });
+  }
+  
+  /**
+   * Update mute button visual state
+   */
+  private updateMuteButtonUI(): void {
+    const muteBtn = document.getElementById('mute-button');
+    if (muteBtn) {
+      const isMuted = this.soundService.isSoundMuted();
+      muteBtn.textContent = isMuted ? '🔇 Unmute' : '🔊 Mute';
+      muteBtn.setAttribute('aria-label', isMuted ? 'Unmute sounds' : 'Mute sounds');
+    }
   }
 
   public initialize(selectedWeapon: WeaponType): void {
