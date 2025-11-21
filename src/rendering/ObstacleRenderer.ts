@@ -93,7 +93,7 @@ export class ObstacleRenderer {
     this.ctx.globalAlpha = opacity;
 
     // Draw drop shadow
-    if (opacity > 0.3) {
+    if (opacity > 0.3 && obstacle.type !== 'RUIN' && obstacle.type !== 'CASTLE') {
       this.drawShadow(pixel, scaledWidth, scaledHeight);
     }
 
