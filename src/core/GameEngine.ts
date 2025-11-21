@@ -98,6 +98,9 @@ export class GameEngine {
     // Initialize fog of war
     this.renderer.initFogOfWar(this.gameState);
     
+    // Resume background music when game starts
+    this.soundService.resumeBackgroundMusic();
+    
     // Initialize interaction controller after game state is ready
     if (!this.interactionController) {
       this.interactionController = new InteractionController(
@@ -207,6 +210,9 @@ export class GameEngine {
   private handleGameEnd(victor: 'player' | 'ai'): void {
     Logger.info(`Game ended. Victor: ${victor}`);
     this.stopGameLoop();
+    
+    // Stop background music with fade-out
+    this.soundService.stopBackgroundMusic();
     
     // Play lose sound if player lost
     if (victor === 'ai') {

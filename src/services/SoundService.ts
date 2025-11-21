@@ -170,8 +170,8 @@ export class SoundService {
         playPromise
           .then(() => {
             console.log('[SoundService] Background music started');
-            // Fade in over 2 seconds
-            this.fadeIn(this.backgroundMusic!, this.musicVolume, 2000);
+            // Fade in over 400ms
+            this.fadeIn(this.backgroundMusic!, this.musicVolume, 400);
           })
           .catch((error) => {
             console.warn('[SoundService] Music playback prevented by browser:', error);
@@ -202,6 +202,59 @@ export class SoundService {
       currentStep++;
       audio.volume = Math.min(volumeIncrement * currentStep, targetVolume);
     }, stepDuration);
+  }
+
+  /**
+   * Fade out audio element to zero volume
+   */
+  private fadeOut(audio: HTMLAudioElement, duration: number, onComplete?: () => void): void {
+    const steps = 20;
+    const stepDuration = duration / steps;
+    const currentVolume = audio.volume;
+    const volumeDecrement = currentVolume / steps;
+    let currentStep = 0;
+
+    const fadeInterval = setInterval(() => {
+      if (currentStep >= steps) {
+        audio.volume = 0;
+        clearInterval(fadeInterval);
+        if (onComplete) onComplete();
+        return;
+      }
+
+      currentStep++;
+      audio.volume = Math.max(currentVolume - (volumeDecrement * currentStep), 0);
+    }, stepDuration);
+  }
+
+  /**
+   * Stop background music with fade-out effect
+   */
+  public stopBackgroundMusic(): void {
+    if (!this.backgroundMusic || !this.isMusicLoaded) {
+      return;
+    }
+
+    // Fade out over 400ms then pause
+    this.fadeOut(this.backgroundMusic, 400, () => {
+      if (this.backgroundMusic) {
+        this.backgroundMusic.pause();
+        console.log('[SoundService] Background music stopped');
+      }
+    });
+  }
+
+  /**
+   * Resume background music (public method for game state changes)
+   */
+  public resumeBackgroundMusic(): void {
+    if (!this.isMusicLoaded || !this.backgroundMusic || this.isMuted) {
+      return;
+    }
+
+    if (this.backgroundMusic.paused) {
+      this.startBackgroundMusic();
+    }
   }
 
   /**
