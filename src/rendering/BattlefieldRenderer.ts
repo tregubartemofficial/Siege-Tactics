@@ -14,8 +14,7 @@ export class BattlefieldRenderer {
   private centerX: number;
   private centerY: number;
   
-  // Isometric projection constants
-  private readonly ISO_ANGLE = Math.PI / 6; // 30 degrees for classic isometric look
+  // 3D effect constants
   private readonly HEX_HEIGHT = 8; // Pixel height for 3D depth effect
 
   constructor(canvas: HTMLCanvasElement) {
@@ -74,6 +73,7 @@ export class BattlefieldRenderer {
   /**
    * Draw the top face of the hex with lighting gradient
    * Applies color based on shrink zone status
+   * Civ 6 style - seamless connected hexes with subtle borders
    */
   private drawHexTop(pixel: {x: number, y: number}, isShrinkZone: boolean): void {
     const vertices = this.calculateIsometricHexVertices(pixel.x, pixel.y);
@@ -97,23 +97,24 @@ export class BattlefieldRenderer {
       gradient.addColorStop(0, '#7a3030');
       gradient.addColorStop(1, '#5a2020');
     } else {
-      // Grass green for playable area
-      gradient.addColorStop(0, '#8aab5f');
-      gradient.addColorStop(1, '#6a8b3f');
+      // Grass green for playable area - slightly more vibrant like Civ 6
+      gradient.addColorStop(0, '#9bc45f');
+      gradient.addColorStop(1, '#7a9b3f');
     }
     
     this.ctx.fillStyle = gradient;
     this.ctx.fill();
     
-    // Draw border
-    this.ctx.strokeStyle = '#5a5a5a'; // Stone gray
-    this.ctx.lineWidth = 2;
+    // Draw subtle border like Civ 6 - thin, semi-transparent
+    this.ctx.strokeStyle = 'rgba(90, 90, 90, 0.3)'; // Semi-transparent stone gray
+    this.ctx.lineWidth = 1; // Thin border for connected look
     this.ctx.stroke();
   }
 
   /**
    * Draw the visible side faces of the hex for 3D depth effect
    * Only draws the 3 sides facing the camera (bottom faces)
+   * Civ 6 style - subtle 3D with integrated appearance
    */
   private drawHexSides(pixel: {x: number, y: number}, isShrinkZone: boolean): void {
     const vertices = this.calculateIsometricHexVertices(pixel.x, pixel.y);
@@ -134,44 +135,54 @@ export class BattlefieldRenderer {
       
       this.ctx.fillStyle = sideColor;
       this.ctx.fill();
-      this.ctx.strokeStyle = '#4a4a4a'; // Darker border for sides
-      this.ctx.lineWidth = 1;
+      
+      // Very subtle side borders for Civ 6 look
+      this.ctx.strokeStyle = 'rgba(74, 74, 74, 0.2)';
+      this.ctx.lineWidth = 0.5;
       this.ctx.stroke();
     }
   }
 
   /**
-   * Convert hex cube coordinates to isometric pixel coordinates
-   * Applies 30-degree rotation for classic isometric view
+   * Convert hex cube coordinates to pixel coordinates for pointy-top hexagons
+   * With 60-degree isometric projection - Most eye-pleasing view
+   * Based on: height = (sqrt(3)/2) * width * cos(60°)
    */
   private hexToIsometricPixel(coord: HexCoordinate): {x: number, y: number} {
-    // Standard flat-top hex to pixel conversion
-    const flatX = this.hexSize * (3/2 * coord.q);
-    const flatY = this.hexSize * (Math.sqrt(3)/2 * coord.q + Math.sqrt(3) * coord.r);
+    // For pointy-top hexagons with 60° isometric projection
+    const hexWidth = Math.sqrt(3) * this.hexSize;
+    const hexHeight = this.hexSize * 1.5; // Vertical spacing for pointy-top
     
-    // Apply isometric projection (rotation matrix)
-    const isoX = flatX * Math.cos(this.ISO_ANGLE) - flatY * Math.sin(this.ISO_ANGLE);
-    const isoY = flatX * Math.sin(this.ISO_ANGLE) + flatY * Math.cos(this.ISO_ANGLE);
+    // Isometric compression factor (cos(60°) = 0.5)
+    const verticalScale = 0.5;
     
-    return {
-      x: this.centerX + isoX,
-      y: this.centerY + isoY
-    };
+    // Calculate position with proper hex grid spacing
+    const x = this.centerX + hexWidth * (coord.q + coord.r / 2);
+    const y = this.centerY + hexHeight * coord.r * verticalScale;
+    
+    return { x, y };
   }
 
   /**
-   * Calculate the 6 vertices of an isometric hexagon
-   * Returns vertices in clockwise order starting from right vertex
+   * Calculate the 6 vertices of a pointy-top isometric hexagon
+   * Using 60-degree projection for optimal visual appearance
    */
   private calculateIsometricHexVertices(x: number, y: number): Array<{x: number, y: number}> {
-    const angles = [0, 60, 120, 180, 240, 300]; // degrees for flat-top hex
-    return angles.map(angleDeg => {
-      const angleRad = (Math.PI / 180) * angleDeg;
-      return {
+    const vertices: Array<{x: number, y: number}> = [];
+    
+    // Width stays the same, height is compressed by cos(60°) = 0.5
+    const verticalScale = 0.5; // cos(60°)
+    
+    // Pointy-top hexagon vertices with isometric compression
+    for (let i = 0; i < 6; i++) {
+      const angleRad = (Math.PI / 180) * (60 * i + 30);
+      vertices.push({
         x: x + this.hexSize * Math.cos(angleRad),
-        y: y + this.hexSize * Math.sin(angleRad) * 0.5 // Flatten Y for isometric perspective
-      };
-    });
+        y: y + this.hexSize * Math.sin(angleRad) * verticalScale
+      });
+    }
+    
+    return vertices;
   }
 
   /**
