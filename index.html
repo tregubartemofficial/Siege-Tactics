@@ -37,7 +37,10 @@
     <div class="top-hud">
       <div id="turn-indicator" class="turn-indicator">PLAYER TURN</div>
       <div class="xp-counter">XP: <span id="battle-xp">0</span></div>
-      <button id="pause-btn" class="btn btn-small">PAUSE</button>
+      <div>
+      <button id="mute-button" class="btn btn-small" aria-label="Mute sounds">🔊 Mute</button>
+      <button id="pause-btn" class="btn btn-small">⏸️ Pause</button>
+      </div>
     </div>
 
     <!-- Canvas Container -->
@@ -96,6 +99,17 @@
       <div class="victory-buttons">
         <button id="rematch-btn" class="btn btn-primary">REMATCH</button>
         <button id="main-menu-btn" class="btn btn-secondary">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Menu Overlay -->
+  <div id="pause-overlay" class="overlay" style="display: none;">
+    <div class="pause-panel">
+      <h2>GAME PAUSED</h2>
+      <div class="pause-buttons">
+        <button id="resume-btn" class="btn btn-primary">RESUME</button>
+        <button id="quit-to-menu-btn" class="btn btn-secondary">QUIT TO MENU</button>
       </div>
     </div>
   </div>
