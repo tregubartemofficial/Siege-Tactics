@@ -1,5 +1,6 @@
 import { GameState } from '../core/GameState';
 import { BattlefieldRenderer } from './BattlefieldRenderer';
+import { UnitRenderer } from './UnitRenderer';
 
 /**
  * Main rendering orchestrator that manages all rendering subsystems
@@ -9,6 +10,7 @@ export class Renderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private battlefieldRenderer: BattlefieldRenderer;
+  private unitRenderer: UnitRenderer;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -20,6 +22,7 @@ export class Renderer {
     
     this.ctx = context;
     this.battlefieldRenderer = new BattlefieldRenderer(canvas);
+    this.unitRenderer = new UnitRenderer(context, 35, canvas); // hexSize = 35
     
     // Handle high-DPI displays
     this.setupHighDPI();
@@ -35,8 +38,8 @@ export class Renderer {
     
     // Render layers in order (back to front)
     this.battlefieldRenderer.render(gameState);
+    this.unitRenderer.render(gameState);
     
-    // TODO: Unit rendering (Story 02)
     // TODO: Effects rendering (Story 05)
     // TODO: Fog of war (Story 07)
   }
@@ -48,6 +51,7 @@ export class Renderer {
   public resize(): void {
     this.setupHighDPI();
     this.battlefieldRenderer.resize();
+    this.unitRenderer.resize(this.canvas);
   }
 
   /**
