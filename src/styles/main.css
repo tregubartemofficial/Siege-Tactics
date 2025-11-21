@@ -1,0 +1,436 @@
+/**
+ * Siege Tactics - Main Stylesheet
+ * Medieval pixel-art themed CSS
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background-color: #2C2416;
+  color: #E8DCC8;
+  overflow: hidden;
+}
+
+/* Screen Layouts */
+.screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main Menu */
+.menu-container {
+  text-align: center;
+  padding: 32px;
+  background: rgba(44, 36, 22, 0.9);
+  border: 4px solid #8B6F47;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 90%;
+}
+
+.game-title {
+  font-size: 48px;
+  color: #D4AF37;
+  margin-bottom: 32px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.xp-display {
+  margin: 24px 0;
+}
+
+.xp-label {
+  font-size: 14px;
+  color: #6B5D4F;
+  margin-bottom: 8px;
+}
+
+#xp-value {
+  font-size: 24px;
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 24px;
+  background: #2C2416;
+  border: 2px solid #8B6F47;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4AF37, #F4D03F);
+  transition: width 0.5s ease-out;
+}
+
+.xp-unlock-text {
+  font-size: 12px;
+  color: #6B5D4F;
+  margin-top: 4px;
+}
+
+/* Weapon Selection */
+.weapon-arsenal {
+  margin: 32px 0;
+}
+
+.weapon-arsenal h2 {
+  font-size: 20px;
+  color: #E8DCC8;
+  margin-bottom: 16px;
+}
+
+.weapon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.weapon-card {
+  padding: 16px;
+  background: #4A3F32;
+  border: 2px solid #8B6F47;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.weapon-card.unlocked:hover {
+  transform: scale(1.05);
+  border-color: #D4AF37;
+  background: #5A4F42;
+}
+
+.weapon-card.selected {
+  border-color: #D4AF37;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.5);
+}
+
+.weapon-card.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.weapon-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.weapon-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.weapon-description {
+  font-size: 12px;
+  color: #B8AC98;
+  margin-bottom: 8px;
+}
+
+.weapon-stats-mini {
+  font-size: 11px;
+  color: #6B5D4F;
+}
+
+.unlock-requirement {
+  margin-top: 8px;
+  color: #C24641;
+  font-size: 12px;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  border: 2px solid #8B6F47;
+  background: #4A3F32;
+  color: #E8DCC8;
+  border-radius: 4px;
+  transition: all 0.2s;
+  margin: 0 8px;
+}
+
+.btn:hover {
+  background: #5A4F42;
+  transform: scale(1.02);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: #4A7C9D;
+  border-color: #6A9CBD;
+  color: white;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background: #5A8CAD;
+}
+
+.btn-secondary {
+  background: #6B5D4F;
+  border-color: #8B7D6F;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Battle UI */
+.top-hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(44, 36, 22, 0.95);
+  border-bottom: 2px solid #8B6F47;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+}
+
+.turn-indicator {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.turn-indicator.player {
+  background: #4A7C9D;
+  color: white;
+}
+
+.turn-indicator.ai {
+  background: #C24641;
+  color: white;
+}
+
+.xp-counter {
+  font-size: 18px;
+  color: #D4AF37;
+}
+
+.canvas-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #1A1510;
+}
+
+#game-canvas {
+  border: 2px solid #8B6F47;
+  background: #2C2416;
+}
+
+.bottom-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: rgba(44, 36, 22, 0.95);
+  border-top: 2px solid #8B6F47;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  z-index: 100;
+}
+
+.unit-info {
+  flex: 1;
+}
+
+.unit-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.health-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.health-bar {
+  width: 200px;
+  height: 20px;
+  background: #2C2416;
+  border: 2px solid #8B6F47;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.health-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5C8A3E, #7CAA5E);
+  transition: width 0.3s ease-out;
+}
+
+.health-text {
+  font-size: 14px;
+  color: #B8AC98;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Victory Screen */
+.victory-container {
+  text-align: center;
+  padding: 48px;
+  background: rgba(44, 36, 22, 0.95);
+  border: 4px solid #8B6F47;
+  border-radius: 8px;
+  max-width: 600px;
+}
+
+.victory-title {
+  font-size: 64px;
+  margin-bottom: 32px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.victory-title.victory {
+  color: #D4AF37;
+}
+
+.victory-title.defeat {
+  color: #C24641;
+}
+
+.battle-summary {
+  margin: 24px 0;
+}
+
+.summary-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #6B5D4F;
+}
+
+.summary-stat.xp-earned {
+  font-size: 20px;
+  font-weight: bold;
+  color: #D4AF37;
+  border-bottom: none;
+}
+
+.unlock-notification {
+  margin: 32px 0;
+  padding: 24px;
+  background: rgba(212, 175, 55, 0.2);
+  border: 2px solid #D4AF37;
+  border-radius: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.unlock-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.unlock-text {
+  font-size: 18px;
+  color: #D4AF37;
+  margin-bottom: 8px;
+}
+
+.unlocked-weapon {
+  font-size: 32px;
+  font-weight: bold;
+  color: #F4D03F;
+}
+
+.victory-buttons {
+  margin-top: 32px;
+}
+
+/* Help Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.help-panel {
+  position: relative;
+  max-width: 600px;
+  max-height: 80vh;
+  background: #2C2416;
+  border: 4px solid #8B6F47;
+  border-radius: 8px;
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #C24641;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.help-content section {
+  margin-bottom: 24px;
+}
+
+.help-content h3 {
+  color: #D4AF37;
+  margin-bottom: 8px;
+}
+
+.help-content p {
+  line-height: 1.6;
+  color: #B8AC98;
+}

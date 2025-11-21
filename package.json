@@ -1,0 +1,21 @@
+{
+  "name": "siege-tactics",
+  "version": "1.0.0",
+  "description": "Browser-based turn-based tactical combat game featuring medieval siege weapons",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
+  },
+  "author": "Developer",
+  "license": "MIT"
+}

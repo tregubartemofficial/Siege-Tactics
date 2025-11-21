@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Siege Tactics - Medieval Hex Warfare</title>
+  <meta name="description" content="Turn-based tactical combat with medieval siege weapons on a hex-grid battlefield">
+  <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+  <!-- Main Menu Screen -->
+  <div id="main-menu" class="screen">
+    <div class="menu-container">
+      <h1 class="game-title">SIEGE TACTICS</h1>
+      <div class="xp-display">
+        <div class="xp-label">Experience Points</div>
+        <div id="xp-value">0 XP</div>
+        <div class="progress-bar">
+          <div id="xp-progress" class="progress-fill"></div>
+        </div>
+        <div id="xp-next-unlock" class="xp-unlock-text">Next Unlock: Ballista at 100 XP</div>
+      </div>
+      <div class="weapon-arsenal">
+        <h2>Select Your Weapon</h2>
+        <div class="weapon-grid" id="weapon-selection">
+          <!-- Weapon cards populated by JavaScript -->
+        </div>
+      </div>
+      <button id="start-battle-btn" class="btn btn-primary">START BATTLE</button>
+      <button id="help-btn" class="btn btn-secondary">HELP</button>
+    </div>
+  </div>
+
+  <!-- Battle Screen -->
+  <div id="battle-ui" class="screen" style="display: none;">
+    <!-- Top HUD -->
+    <div class="top-hud">
+      <div id="turn-indicator" class="turn-indicator">PLAYER TURN</div>
+      <div class="xp-counter">XP: <span id="battle-xp">0</span></div>
+      <button id="pause-btn" class="btn btn-small">PAUSE</button>
+    </div>
+
+    <!-- Canvas Container -->
+    <div class="canvas-container">
+      <canvas id="game-canvas" width="1280" height="720"></canvas>
+    </div>
+
+    <!-- Bottom Action Panel -->
+    <div class="bottom-panel">
+      <div class="unit-info" id="unit-info">
+        <div class="unit-name" id="unit-name">No Unit Selected</div>
+        <div class="health-bar-container">
+          <div class="health-bar" id="unit-health-bar">
+            <div class="health-fill" id="unit-health-fill"></div>
+          </div>
+          <div class="health-text" id="unit-health-text">--/--</div>
+        </div>
+        <div class="weapon-stats" id="weapon-stats"></div>
+      </div>
+      <div class="action-buttons">
+        <button id="move-btn" class="btn action-btn" disabled>MOVE</button>
+        <button id="attack-btn" class="btn action-btn" disabled>ATTACK</button>
+        <button id="end-turn-btn" class="btn btn-primary">END TURN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory/Defeat Screen -->
+  <div id="victory-screen" class="screen" style="display: none;">
+    <div class="victory-container">
+      <h1 id="victory-title" class="victory-title">VICTORY!</h1>
+      <div class="battle-summary">
+        <div class="summary-stat">
+          <span class="stat-label">Enemies Destroyed:</span>
+          <span id="enemies-destroyed">0</span>
+        </div>
+        <div class="summary-stat">
+          <span class="stat-label">Turns Taken:</span>
+          <span id="turns-taken">0</span>
+        </div>
+        <div class="summary-stat xp-earned">
+          <span class="stat-label">XP Earned:</span>
+          <span id="xp-earned">+0</span>
+        </div>
+      </div>
+      <div id="unlock-notification" class="unlock-notification" style="display: none;">
+        <div class="unlock-icon">🏹</div>
+        <div class="unlock-text">NEW WEAPON UNLOCKED!</div>
+        <div id="unlocked-weapon-name" class="unlocked-weapon">BALLISTA</div>
+      </div>
+      <div class="xp-progress-section">
+        <div class="xp-label">Total XP: <span id="total-xp">0</span></div>
+        <div class="progress-bar">
+          <div id="victory-xp-progress" class="progress-fill"></div>
+        </div>
+        <div id="victory-next-unlock" class="xp-unlock-text"></div>
+      </div>
+      <div class="victory-buttons">
+        <button id="rematch-btn" class="btn btn-primary">REMATCH</button>
+        <button id="main-menu-btn" class="btn btn-secondary">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help/Tutorial Overlay -->
+  <div id="help-overlay" class="overlay" style="display: none;">
+    <div class="help-panel">
+      <button id="close-help-btn" class="close-btn">✕</button>
+      <h2>How to Play</h2>
+      <div class="help-content">
+        <section>
+          <h3>🎯 Objective</h3>
+          <p>Destroy all enemy units to win the battle!</p>
+        </section>
+        <section>
+          <h3>🚶 Movement</h3>
+          <p>1. Click your unit to select it<br>
+          2. Blue hexes show where you can move<br>
+          3. Click a blue hex to move there</p>
+        </section>
+        <section>
+          <h3>⚔️ Attacking</h3>
+          <p>1. After selecting your unit, red hexes show attack range<br>
+          2. Click an enemy in red range to attack<br>
+          3. Watch the projectile arc and damage!</p>
+        </section>
+        <section>
+          <h3>🌫️ Fog of War</h3>
+          <p>You can only see 3-4 hexes around your units. Explore carefully!</p>
+        </section>
+        <section>
+          <h3>🏹 Weapon Types</h3>
+          <p><strong>Catapult:</strong> Balanced range and damage (Starting weapon)<br>
+          <strong>Ballista:</strong> Long range, fast fire, precise (100 XP)<br>
+          <strong>Trebuchet:</strong> Extreme range, devastating damage (300 XP)</p>
+        </section>
+        <section>
+          <h3>⭐ XP & Unlocks</h3>
+          <p>Earn 50 XP for each enemy destroyed. Unlock new weapons by earning XP!</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
