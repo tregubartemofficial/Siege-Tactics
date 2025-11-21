@@ -63,15 +63,17 @@ export class BattlefieldRenderer {
    */
   private drawIsometricHex(coord: HexCoordinate, gameState: GameState): void {
     const pixel = this.hexToIsometricPixel(coord);
-    const isShrinkZone = HexUtils.distance(coord, {q: 0, r: 0, s: 0}) > gameState.shrinkRadius;
+    const distance = HexUtils.distance(coord, {q: 0, r: 0, s: 0});
+    const isShrinkZone = distance > gameState.shrinkRadius;
+    const isNextShrinkZone = distance > gameState.shrinkRadius - 1 && !isShrinkZone;
     
     // Get tile for fog of war opacity
     const tile = gameState.getTileAt(coord);
     const opacity = tile ? tile.getOpacity() : 1.0;
     
     // Draw hex with 3D depth - sides first, then top
-    this.drawHexSides(pixel, isShrinkZone, opacity);
-    this.drawHexTop(pixel, isShrinkZone, opacity);
+    this.drawHexSides(pixel, isShrinkZone, isNextShrinkZone, opacity);
+    this.drawHexTop(pixel, isShrinkZone, isNextShrinkZone, opacity);
   }
 
   /**
@@ -79,7 +81,7 @@ export class BattlefieldRenderer {
    * Applies color based on shrink zone status
    * Civ 6 style - seamless connected hexes with subtle borders
    */
-  private drawHexTop(pixel: {x: number, y: number}, isShrinkZone: boolean, opacity: number = 1.0): void {
+  private drawHexTop(pixel: {x: number, y: number}, isShrinkZone: boolean, isNextShrinkZone: boolean, opacity: number = 1.0): void {
     const vertices = this.calculateIsometricHexVertices(pixel.x, pixel.y);
     
     // Apply fog of war opacity
@@ -100,9 +102,13 @@ export class BattlefieldRenderer {
     );
     
     if (isShrinkZone) {
-      // Dark red for shrink zone
+      // Dark red for shrink zone (dead zone)
       gradient.addColorStop(0, '#7a3030');
       gradient.addColorStop(1, '#5a2020');
+    } else if (isNextShrinkZone) {
+      // Yellow/orange for next shrink zone warning
+      gradient.addColorStop(0, '#d4a034');
+      gradient.addColorStop(1, '#b88520');
     } else {
       // Grass green for playable area - slightly more vibrant like Civ 6
       gradient.addColorStop(0, '#9bc45f');
@@ -126,9 +132,17 @@ export class BattlefieldRenderer {
    * Only draws the 3 sides facing the camera (bottom faces)
    * Civ 6 style - subtle 3D with integrated appearance
    */
-  private drawHexSides(pixel: {x: number, y: number}, isShrinkZone: boolean, opacity: number = 1.0): void {
+  private drawHexSides(pixel: {x: number, y: number}, isShrinkZone: boolean, isNextShrinkZone: boolean, opacity: number = 1.0): void {
     const vertices = this.calculateIsometricHexVertices(pixel.x, pixel.y);
-    const sideColor = isShrinkZone ? '#4a2020' : '#5a7a3a'; // Darker shade for sides
+    let sideColor: string;
+    
+    if (isShrinkZone) {
+      sideColor = '#4a2020'; // Dark red for dead zone
+    } else if (isNextShrinkZone) {
+      sideColor = '#9a7020'; // Orange for warning zone
+    } else {
+      sideColor = '#5a7a3a'; // Green for safe zone
+    }
     
     // Apply fog of war opacity
     this.ctx.globalAlpha = opacity;

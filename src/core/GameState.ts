@@ -147,6 +147,29 @@ export class GameState {
       const distance = HexUtils.distance(tile.coordinate, HexUtils.create(0, 0));
       tile.isInBounds = distance <= this.shrinkRadius;
     });
+    
+    // Kill units in the dead zone
+    this.checkDeadZoneDeaths();
+  }
+
+  private checkDeadZoneDeaths(): void {
+    const center = HexUtils.create(0, 0);
+    
+    // Check player units
+    this.playerUnits.forEach(unit => {
+      const distance = HexUtils.distance(unit.position, center);
+      if (distance > this.shrinkRadius) {
+        unit.takeDamage(unit.health); // Kill instantly
+      }
+    });
+    
+    // Check AI units
+    this.aiUnits.forEach(unit => {
+      const distance = HexUtils.distance(unit.position, center);
+      if (distance > this.shrinkRadius) {
+        unit.takeDamage(unit.health); // Kill instantly
+      }
+    });
   }
 
   public checkVictoryCondition(): 'player' | 'ai' | null {
