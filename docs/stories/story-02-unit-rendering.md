@@ -25,7 +25,7 @@ Unit visualization is essential for gameplay. Players must distinguish between:
 - Unit health status
 - Selected unit highlighting
 
-This story implements visual representation of all units on the battlefield, building on the hex grid from Story 01.
+This story implements visual representation of all units on the battlefield, building on the **2.5D isometric hex grid** from Story 01. Units will be rendered with slight elevation and shadows to match the isometric perspective.
 
 ---
 

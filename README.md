@@ -55,7 +55,7 @@ Siege Tactics uses a **client-side SPA architecture** built with:
 
 - **TypeScript** - Type-safe game logic
 - **Vite** - Fast build tool and dev server
-- **HTML5 Canvas** - High-performance rendering
+- **HTML5 Canvas** - High-performance 2.5D isometric rendering
 - **LocalStorage** - Player progression persistence
 - **Vercel** - Static hosting and CDN
 
@@ -108,7 +108,7 @@ siege-tactics/
 |----------|-----------|
 | Language | TypeScript 5.3+ |
 | Build Tool | Vite 5.0+ |
-| Rendering | HTML5 Canvas 2D API |
+| Rendering | HTML5 Canvas 2.5D Isometric |
 | State Management | Custom Event Emitter |
 | Persistence | LocalStorage |
 | Hosting | Vercel |
@@ -155,7 +155,7 @@ MIT License - see LICENSE file for details
 
 ## 🐛 Known Issues
 
-- Canvas rendering not yet implemented
+- 2.5D isometric rendering not yet implemented
 - AI logic placeholder only
 - Fog of war visualization pending
 - Projectile animations not implemented

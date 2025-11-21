@@ -130,16 +130,16 @@ Basic UI structure exists:
 ### Critical Path Items (P0 - Must Have for MVP)
 
 #### 1. Rendering System (0% Complete) - **HIGHEST PRIORITY**
-Without rendering, the game cannot be seen or played.
+Without rendering, the game cannot be seen or played. Using 2.5D isometric perspective for enhanced visual appeal.
 
 **Missing Files:**
 - ⏳ `src/rendering/Renderer.ts` - Canvas rendering orchestrator
-- ⏳ `src/rendering/BattlefieldRenderer.ts` - Hex grid drawing
-- ⏳ `src/rendering/UnitRenderer.ts` - Unit sprite rendering
+- ⏳ `src/rendering/BattlefieldRenderer.ts` - 2.5D isometric hex grid drawing
+- ⏳ `src/rendering/UnitRenderer.ts` - Unit sprite rendering with depth
 - ⏳ `src/rendering/FogOfWarRenderer.ts` - Visibility overlay
 - ⏳ `src/rendering/EffectsRenderer.ts` - Projectile animations
 
-**Estimated Effort:** 2-3 hours
+**Estimated Effort:** 3-4 hours (2.5D adds complexity)
 
 #### 2. Game Services (0% Complete) - **CORE GAMEPLAY**
 Business logic to make the game functional.

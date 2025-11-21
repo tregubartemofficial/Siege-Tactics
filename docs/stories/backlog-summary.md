@@ -11,7 +11,7 @@
 
 This backlog contains **6 core development stories** to complete the MVP of Siege Tactics. All foundation work (architecture, data models, utilities) is complete. These stories focus on implementing the rendering, gameplay services, and integration layers.
 
-**Total Estimated Effort:** 15 Story Points (~10-11 hours)  
+**Total Estimated Effort:** 16 Story Points (~11-12 hours)  
 **Current MVP Completion:** 40%  
 **Remaining Work:** 60%
 
@@ -47,14 +47,14 @@ graph TD
 
 | ID | Title | Priority | Est. | Dependencies | Status |
 |----|-------|----------|------|--------------|--------|
-| SIEGE-001 | Battlefield Rendering System | P0 | 3 SP | None | ✅ Ready |
+| SIEGE-001 | Battlefield Rendering System (2.5D) | P0 | 4 SP | None | ✅ Ready |
 | SIEGE-002 | Unit Rendering | P0 | 2 SP | 001 | ✅ Ready |
 | SIEGE-003 | Pathfinding Service | P0 | 3 SP | None | ✅ Ready |
 | SIEGE-004 | Combat Service | P0 | 2 SP | 003 | ✅ Ready |
 | SIEGE-005 | AI Service | P0 | 3 SP | 003, 004 | ✅ Ready |
 | SIEGE-006 | Game Loop Integration | P0 | 2 SP | All | ✅ Ready |
 
-**Total:** 15 Story Points
+**Total:** 16 Story Points
 
 ---
 
@@ -63,18 +63,19 @@ graph TD
 ### Story 01: Battlefield Rendering System
 **File:** `story-01-battlefield-rendering-system.md`  
 **Priority:** P0 (Critical - Blocking)  
-**Estimate:** 3 Story Points (~2 hours)
+**Estimate:** 4 Story Points (~3 hours)
 
 **What it does:**
-- Implements Canvas-based hex grid rendering
+- Implements 2.5D isometric Canvas-based hex grid rendering
 - Creates BattlefieldRenderer.ts and Renderer.ts
-- Displays 15x15 hexagonal battlefield
+- Displays 15x15 hexagonal battlefield with depth/elevation
 - Integrates with GameEngine rendering pipeline
+- Z-order depth sorting for proper layering
 
 **Key Deliverables:**
 - `src/rendering/BattlefieldRenderer.ts`
 - `src/rendering/Renderer.ts`
-- Visual output: Hex grid on canvas
+- Visual output: Isometric hex grid with 3D appearance
 
 **Blocks:** Story 02 (Unit Rendering)
 
@@ -183,10 +184,10 @@ graph TD
 
 ### Recommended Approach (Solo Developer)
 
-**Phase 1: Visual Foundation (3-4 hours)**
-1. Story 01: Battlefield Rendering (2 hours)
+**Phase 1: Visual Foundation (4-5 hours)**
+1. Story 01: Battlefield Rendering - 2.5D Isometric (3 hours)
 2. Story 02: Unit Rendering (1.5 hours)
-3. **Checkpoint:** Verify units visible on battlefield
+3. **Checkpoint:** Verify units visible on isometric battlefield
 
 **Phase 2: Game Logic (4-5 hours)**
 4. Story 03: Pathfinding Service (2 hours)
@@ -198,7 +199,7 @@ graph TD
 8. Story 06: Game Loop Integration (1.5 hours)
 9. **Checkpoint:** Full gameplay test
 
-**Total Time:** ~10-11 hours
+**Total Time:** ~11-12 hours
 
 ### Team Development (If Multiple Developers)
 
