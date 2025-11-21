@@ -2,6 +2,7 @@ import { GameState } from '../core/GameState';
 import { HexCoordinate } from '../models/HexCoordinate';
 import { HexUtils } from '../utils/HexUtils';
 import { PathfindingService } from '../services/PathfindingService';
+import { CombatService } from '../services/CombatService';
 import { Logger } from '../utils/Logger';
 
 /**
@@ -72,8 +73,21 @@ export class InteractionController {
       return;
     }
 
-    // If unit is selected, try to move
+    // If unit is selected, check for attack or movement
     if (this.gameState.selectedUnit) {
+      // Check if clicking on enemy unit for attack
+      const enemyUnit = CombatService.getEnemyAtHex(
+        hex,
+        this.gameState.selectedUnit,
+        this.gameState
+      );
+
+      if (enemyUnit) {
+        this.tryAttackUnit(hex);
+        return;
+      }
+
+      // Otherwise try to move
       this.tryMoveUnit(hex);
     }
   }
@@ -88,15 +102,22 @@ export class InteractionController {
 
     this.gameState.selectedUnit = unit;
     
-    // Calculate reachable hexes
+    // Calculate reachable hexes for movement
     this.gameState.validMoveHexes = PathfindingService.getReachableHexes(
       unit.position,
       unit.getMovementRange(),
       this.gameState
     );
 
+    // Calculate attack range
+    this.gameState.validAttackHexes = CombatService.getAttackRange(
+      unit,
+      this.gameState
+    );
+
     Logger.info(`Selected ${unit.type} at (${unit.position.q}, ${unit.position.r})`);
     Logger.info(`Can move to ${this.gameState.validMoveHexes.length} hexes`);
+    Logger.info(`Can attack ${this.gameState.validAttackHexes.length} hexes`);
   }
 
   private tryMoveUnit(destination: HexCoordinate): void {
@@ -123,7 +144,61 @@ export class InteractionController {
     // Clear selection
     this.gameState.selectedUnit = null;
     this.gameState.validMoveHexes = [];
+    this.gameState.validAttackHexes = [];
     this.gameState.hoveredHex = null;
+  }
+
+  private tryAttackUnit(target: HexCoordinate): void {
+    if (!this.gameState.selectedUnit) return;
+
+    const attacker = this.gameState.selectedUnit;
+
+    // Check if attacker can still attack
+    if (!attacker.canAttack()) {
+      Logger.info('Unit has already attacked this turn');
+      return;
+    }
+
+    // Find the actual target unit
+    const targetUnit = CombatService.getEnemyAtHex(
+      target,
+      attacker,
+      this.gameState
+    );
+
+    if (!targetUnit) {
+      Logger.info('No enemy at target location');
+      return;
+    }
+
+    // Execute attack
+    const result = CombatService.executeAttack(
+      attacker,
+      targetUnit,
+      this.gameState
+    );
+
+    if (result.success) {
+      Logger.info(`Attack successful! Dealt ${result.damage} damage`);
+      
+      if (result.targetDestroyed) {
+        Logger.info('Enemy destroyed!');
+        
+        // Check for victory
+        if (this.gameState.aiUnits.length === 0) {
+          Logger.info('🎉 VICTORY! All enemies destroyed!');
+        }
+      }
+
+      // Keep unit selected if they can still move
+      if (!attacker.canMove()) {
+        this.gameState.selectedUnit = null;
+        this.gameState.validMoveHexes = [];
+        this.gameState.validAttackHexes = [];
+      }
+    } else {
+      Logger.warn('Attack failed');
+    }
   }
 
   /**

@@ -16,6 +16,7 @@ export const CONSTANTS = {
   // Game Balance
   XP_PER_KILL: 50,
   STARTING_HEALTH: 100,
+  MIN_DAMAGE: 1, // Minimum damage per attack
   FOG_OF_WAR_RADIUS: 4, // Hexes
   SHRINK_INTERVAL: 5, // Turns
   MIN_SHRINK_RADIUS: 5, // Hexes

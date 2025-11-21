@@ -8,6 +8,7 @@ import { UIController } from './ui/UIController';
 import { ProgressRepository } from './services/ProgressRepository';
 import { Logger } from './utils/Logger';
 import { PathfindingService } from './services/PathfindingService';
+import { CombatService } from './services/CombatService';
 import { HexUtils } from './utils/HexUtils';
 import './styles/main.css';
 
@@ -64,13 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Expose PathfindingService for testing in console
   (window as any).PathfindingService = PathfindingService;
+  (window as any).CombatService = CombatService;
   (window as any).HexUtils = HexUtils;
   
-  Logger.info('=== Path Visualization Ready! ===');
+  Logger.info('=== Combat System Ready! ===');
   Logger.info('1. Start battle: siegeTactics.startBattle("catapult")');
-  Logger.info('2. Click on your unit (blue/green/purple) to select it');
-  Logger.info('3. Hover over hexes to see the path (yellow animated line)');
-  Logger.info('4. Click on a highlighted hex to move there');
-  Logger.info('5. Blue overlay = reachable hexes, Yellow number = movement cost');
+  Logger.info('2. Click your unit (bottom) to select');
+  Logger.info('3. Blue overlay = movement range, Red overlay = attack range');
+  Logger.info('4. Click enemy unit (red, top of map) to attack');
+  Logger.info('5. Hover over hexes to see movement path');
+  Logger.info('6. Combat log shows damage and destruction');
 });
 
