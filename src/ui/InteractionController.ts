@@ -69,7 +69,12 @@ export class InteractionController {
     );
 
     if (clickedUnit) {
-      this.selectUnit(clickedUnit.id);
+      // If clicking on already selected unit, deselect it
+      if (this.gameState.selectedUnit && this.gameState.selectedUnit.id === clickedUnit.id) {
+        this.deselectUnit();
+      } else {
+        this.selectUnit(clickedUnit.id);
+      }
       return;
     }
 
@@ -118,6 +123,14 @@ export class InteractionController {
     Logger.info(`Selected ${unit.type} at (${unit.position.q}, ${unit.position.r})`);
     Logger.info(`Can move to ${this.gameState.validMoveHexes.length} hexes`);
     Logger.info(`Can attack ${this.gameState.validAttackHexes.length} hexes`);
+  }
+
+  private deselectUnit(): void {
+    this.gameState.selectedUnit = null;
+    this.gameState.validMoveHexes = [];
+    this.gameState.validAttackHexes = [];
+    this.gameState.plannedPath = [];
+    Logger.info('Unit deselected');
   }
 
   private tryMoveUnit(destination: HexCoordinate): void {
