@@ -8,6 +8,7 @@ import { HexTile } from '../models/HexTile';
 import { HexCoordinate } from '../models/HexCoordinate';
 import { WeaponType, PlayerType, CONSTANTS } from '../utils/Constants';
 import { HexUtils } from '../utils/HexUtils';
+import { VisionService } from '../services/VisionService';
 
 export class GameState {
   // Core state
@@ -19,6 +20,9 @@ export class GameState {
   public shrinkRadius: number = CONSTANTS.GRID_RADIUS;
   public turnCount: number = 0;
   
+  // Fog of War
+  public visionService: VisionService;
+  
   // Transient state
   public hoveredHex: HexCoordinate | null = null;
   public validMoveHexes: HexCoordinate[] = [];
@@ -26,11 +30,19 @@ export class GameState {
   public plannedPath: HexCoordinate[] = [];
   public isAnimating: boolean = false;
 
+  constructor() {
+    this.visionService = new VisionService();
+  }
+
   public initialize(playerWeapon: WeaponType): void {
     this.createBattlefield();
     this.spawnUnits(playerWeapon);
     this.currentTurn = 'player';
     this.turnCount = 0;
+    this.visionService.reset();
+    
+    // Initial vision calculation
+    this.updateVision();
   }
 
   private createBattlefield(): void {
@@ -85,6 +97,9 @@ export class GameState {
         this.updateBoundaries();
       }
     }
+    
+    // Update vision at start of each turn
+    this.updateVision();
   }
 
   private resetUnitActions(): void {
@@ -118,5 +133,22 @@ export class GameState {
 
   public update(_deltaTime: number): void {
     // Update animations, timers, etc. (to be implemented)
+  }
+
+  /**
+   * Update fog of war vision for all units
+   * Updates both VisionService and tile visibility states
+   */
+  public updateVision(): void {
+    this.visionService.updateVision(
+      this.playerUnits,
+      this.aiUnits,
+      this.battlefield
+    );
+    
+    // Update tile visibility states from VisionService
+    this.battlefield.forEach((tile, key) => {
+      tile.visibilityForPlayer = this.visionService.getTileVisibilityForPlayer(key);
+    });
   }
 }

@@ -183,6 +183,9 @@ export class AIService {
       unit.position = destination;
       unit.hasMovedThisTurn = true;
       
+      // Update fog of war after AI movement
+      gameState.updateVision();
+      
       this.eventBus.emit('unitMoved', { unit, path, oldPosition: oldPos });
       return true;
     }

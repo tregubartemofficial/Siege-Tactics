@@ -65,9 +65,13 @@ export class BattlefieldRenderer {
     const pixel = this.hexToIsometricPixel(coord);
     const isShrinkZone = HexUtils.distance(coord, {q: 0, r: 0, s: 0}) > gameState.shrinkRadius;
     
+    // Get tile for fog of war opacity
+    const tile = gameState.getTileAt(coord);
+    const opacity = tile ? tile.getOpacity() : 1.0;
+    
     // Draw hex with 3D depth - sides first, then top
-    this.drawHexSides(pixel, isShrinkZone);
-    this.drawHexTop(pixel, isShrinkZone);
+    this.drawHexSides(pixel, isShrinkZone, opacity);
+    this.drawHexTop(pixel, isShrinkZone, opacity);
   }
 
   /**
@@ -75,8 +79,11 @@ export class BattlefieldRenderer {
    * Applies color based on shrink zone status
    * Civ 6 style - seamless connected hexes with subtle borders
    */
-  private drawHexTop(pixel: {x: number, y: number}, isShrinkZone: boolean): void {
+  private drawHexTop(pixel: {x: number, y: number}, isShrinkZone: boolean, opacity: number = 1.0): void {
     const vertices = this.calculateIsometricHexVertices(pixel.x, pixel.y);
+    
+    // Apply fog of war opacity
+    this.ctx.globalAlpha = opacity;
     
     // Fill top face
     this.ctx.beginPath();
@@ -109,6 +116,9 @@ export class BattlefieldRenderer {
     this.ctx.strokeStyle = 'rgba(90, 90, 90, 0.3)'; // Semi-transparent stone gray
     this.ctx.lineWidth = 1; // Thin border for connected look
     this.ctx.stroke();
+    
+    // Reset opacity
+    this.ctx.globalAlpha = 1.0;
   }
 
   /**
@@ -116,9 +126,12 @@ export class BattlefieldRenderer {
    * Only draws the 3 sides facing the camera (bottom faces)
    * Civ 6 style - subtle 3D with integrated appearance
    */
-  private drawHexSides(pixel: {x: number, y: number}, isShrinkZone: boolean): void {
+  private drawHexSides(pixel: {x: number, y: number}, isShrinkZone: boolean, opacity: number = 1.0): void {
     const vertices = this.calculateIsometricHexVertices(pixel.x, pixel.y);
     const sideColor = isShrinkZone ? '#4a2020' : '#5a7a3a'; // Darker shade for sides
+    
+    // Apply fog of war opacity
+    this.ctx.globalAlpha = opacity;
     
     // Draw visible side faces (bottom-right, bottom, bottom-left)
     // Only draw 3 sides that face the camera for proper 3D appearance
@@ -141,6 +154,9 @@ export class BattlefieldRenderer {
       this.ctx.lineWidth = 0.5;
       this.ctx.stroke();
     }
+    
+    // Reset opacity
+    this.ctx.globalAlpha = 1.0;
   }
 
   /**

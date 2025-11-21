@@ -42,6 +42,9 @@ export class GameEngine {
     Logger.info(`Initializing game with weapon: ${selectedWeapon}`);
     this.gameState.initialize(selectedWeapon);
     
+    // Initialize fog of war
+    this.renderer.initFogOfWar(this.gameState);
+    
     // Initialize interaction controller after game state is ready
     if (!this.interactionController) {
       this.interactionController = new InteractionController(

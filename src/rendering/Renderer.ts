@@ -32,6 +32,14 @@ export class Renderer {
   }
 
   /**
+   * Initialize fog of war (now integrated into tile rendering)
+   */
+  public initFogOfWar(_gameState: GameState): void {
+    // Fog of war is now handled directly in BattlefieldRenderer via tile opacity
+    // This method kept for compatibility with GameEngine
+  }
+
+  /**
    * Main render method called every frame
    * Renders all game elements in proper layered order
    */
@@ -45,7 +53,6 @@ export class Renderer {
     this.unitRenderer.render(gameState);
     
     // TODO: Effects rendering (Story 05)
-    // TODO: Fog of war (Story 07)
   }
 
   /**

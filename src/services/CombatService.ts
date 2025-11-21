@@ -64,15 +64,17 @@ export class CombatService {
 
   /**
    * Check if specific target is valid for attack
-   * Validates range, ownership, and turn state
+   * Validates range, ownership, turn state, and fog of war
    * 
    * @param attacker Attacking unit
    * @param target Target unit
+   * @param gameState Current game state (optional, for fog of war check)
    * @returns True if target can be attacked
    */
   public static canAttack(
     attacker: Unit, 
-    target: Unit
+    target: Unit,
+    gameState?: GameState
   ): boolean {
     // Cannot attack if already attacked this turn
     if (attacker.hasAttackedThisTurn) {
@@ -104,6 +106,14 @@ export class CombatService {
       return false;
     }
     
+    // Check fog of war: player can only attack visible enemies
+    if (gameState && attacker.owner === 'player') {
+      if (!gameState.visionService.isUnitVisibleToPlayer(target)) {
+        Logger.debug('Cannot attack unit in fog of war');
+        return false;
+      }
+    }
+    
     return true;
   }
 
@@ -122,7 +132,7 @@ export class CombatService {
     gameState: GameState
   ): AttackResult {
     // Validate attack
-    if (!this.canAttack(attacker, target)) {
+    if (!this.canAttack(attacker, target, gameState)) {
       Logger.warn('Invalid attack attempted');
       return { success: false, damage: 0, targetDestroyed: false };
     }

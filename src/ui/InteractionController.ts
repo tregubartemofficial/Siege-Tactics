@@ -141,6 +141,9 @@ export class InteractionController {
 
     Logger.info(`Moved ${unit.type} from (${oldPos.q}, ${oldPos.r}) to (${destination.q}, ${destination.r})`);
 
+    // Update fog of war after movement
+    this.gameState.updateVision();
+
     // Clear selection
     this.gameState.selectedUnit = null;
     this.gameState.validMoveHexes = [];
