@@ -13,7 +13,6 @@ import { EventBus } from '../core/EventBus';
 export class InteractionController {
   private canvas: HTMLCanvasElement;
   private gameState: GameState;
-  private hexSize: number = 35;
 
   constructor(canvas: HTMLCanvasElement, gameState: GameState) {
     this.canvas = canvas;
@@ -213,12 +212,13 @@ export class InteractionController {
    * Matches the projection used in renderers
    */
   private pixelToIsometricHex(x: number, y: number): HexCoordinate {
+    const hexSize = 50; // Must match BattlefieldRenderer
     const verticalScale = 0.5;
 
     // Inverse isometric transformation
     const adjustedY = y / verticalScale;
-    const q = (x * Math.sqrt(3) / 3 - adjustedY / 3) / this.hexSize;
-    const r = (adjustedY * 2 / 3) / this.hexSize;
+    const q = (x * Math.sqrt(3) / 3 - adjustedY / 3) / hexSize;
+    const r = (adjustedY * 2 / 3) / hexSize;
 
     return this.hexRound({ q, r, s: -q - r });
   }

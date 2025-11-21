@@ -6,9 +6,10 @@
 import { Unit } from '../models/Unit';
 import { HexTile } from '../models/HexTile';
 import { HexCoordinate } from '../models/HexCoordinate';
-import { WeaponType, PlayerType, CONSTANTS } from '../utils/Constants';
+import { WeaponType, PlayerType, CONSTANTS, ObstacleType } from '../utils/Constants';
 import { HexUtils } from '../utils/HexUtils';
 import { VisionService } from '../services/VisionService';
+import { Obstacle } from '../models/Obstacle';
 
 export class GameState {
   // Core state
@@ -55,6 +56,40 @@ export class GameState {
           this.battlefield.set(HexUtils.toKey(coord), tile);
         }
       }
+    }
+    
+    // Place obstacles after battlefield creation
+    this.placeObstacles();
+  }
+  
+  private placeObstacles(): void {
+    const obstacleTypes: ObstacleType[] = ['ROCK_LARGE', 'ROCK_SMALL', 'TREE', 'RUIN', 'CASTLE', 'CHURCH'];
+    const obstacleDensity = 0.15; // 15% of hexes will have obstacles
+    const tiles = Array.from(this.battlefield.values());
+    
+    // Shuffle tiles for random placement
+    const shuffled = tiles.sort(() => Math.random() - 0.5);
+    const numObstacles = Math.floor(tiles.length * obstacleDensity);
+    
+    let placed = 0;
+    for (const tile of shuffled) {
+      if (placed >= numObstacles) break;
+      
+      // Skip starting positions
+      const key = HexUtils.toKey(tile.coordinate);
+      const playerStart = HexUtils.toKey(HexUtils.create(-3, 5));
+      const aiStart = HexUtils.toKey(HexUtils.create(3, -5));
+      
+      if (key === playerStart || key === aiStart) continue;
+      
+      // Skip center area (keep spawn area clear)
+      const distance = HexUtils.distance(tile.coordinate, HexUtils.create(0, 0));
+      if (distance < 2) continue;
+      
+      // Place random obstacle
+      const randomType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+      tile.obstacle = new Obstacle(randomType);
+      placed++;
     }
   }
 

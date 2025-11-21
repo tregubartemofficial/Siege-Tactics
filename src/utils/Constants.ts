@@ -9,9 +9,9 @@ export const CONSTANTS = {
   GRID_RADIUS: 7, // 15x15 grid = -7 to +7 in cube coordinates
   
   // Hex Rendering
-  HEX_SIZE: 30, // Pixels
-  HEX_WIDTH: 52, // ~30 * sqrt(3)
-  HEX_HEIGHT: 60, // 30 * 2
+  HEX_SIZE: 50, // Pixels
+  HEX_WIDTH: 87, // ~50 * sqrt(3)
+  HEX_HEIGHT: 100, // 50 * 2
   
   // Game Balance
   XP_PER_KILL: 50,
@@ -54,3 +54,4 @@ export const CONSTANTS = {
 
 export type WeaponType = 'catapult' | 'ballista' | 'trebuchet';
 export type PlayerType = 'player' | 'ai';
+export type ObstacleType = 'ROCK_LARGE' | 'ROCK_SMALL' | 'TREE' | 'RUIN' | 'CASTLE' | 'CHURCH';

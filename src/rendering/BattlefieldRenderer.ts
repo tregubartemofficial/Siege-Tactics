@@ -26,7 +26,7 @@ export class BattlefieldRenderer {
     }
     
     this.ctx = context;
-    this.hexSize = 35; // pixels - radius from center to vertex
+    this.hexSize = 50; // pixels - radius from center to vertex
     this.centerX = canvas.width / 2;
     this.centerY = canvas.height / 2;
   }

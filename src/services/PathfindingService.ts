@@ -26,30 +26,33 @@ export class PathfindingService {
     const reachable: HexCoordinate[] = [];
     const visited = new Set<string>();
     
-    // Flood fill with distance tracking
-    const queue: Array<{coord: HexCoordinate, distance: number}> = [{coord: start, distance: 0}];
+    // Flood fill with cost tracking (not just distance)
+    const queue: Array<{coord: HexCoordinate, cost: number}> = [{coord: start, cost: 0}];
     
     while (queue.length > 0) {
-      const {coord, distance} = queue.shift()!;
+      const {coord, cost} = queue.shift()!;
       const key = HexUtils.toKey(coord);
       
       if (visited.has(key)) continue;
       visited.add(key);
       
       // Add to reachable if within range and not the starting position
-      if (distance > 0 && distance <= movementRange) {
+      if (cost > 0 && cost <= movementRange) {
         // Can only stop on unoccupied hexes
-        if (!this.isOccupied(coord, gameState) && this.isInPlayableArea(coord, gameState)) {
+        if (!this.isOccupiedByUnit(coord, gameState) && this.isInPlayableArea(coord, gameState)) {
           reachable.push(coord);
         }
       }
       
       // Explore neighbors if within movement range
-      if (distance < movementRange) {
+      if (cost < movementRange) {
         const neighbors = this.getValidNeighbors(coord, gameState);
         neighbors.forEach(neighbor => {
           if (!visited.has(HexUtils.toKey(neighbor))) {
-            queue.push({coord: neighbor, distance: distance + 1});
+            const moveCost = this.getMovementCost(neighbor, gameState);
+            if (moveCost < Infinity) { // Can traverse
+              queue.push({coord: neighbor, cost: cost + 1 + moveCost});
+            }
           }
         });
       }
@@ -72,7 +75,13 @@ export class PathfindingService {
     gameState: GameState
   ): HexCoordinate[] {
     // Check if goal is valid
-    if (this.isOccupied(goal, gameState) || !this.isInPlayableArea(goal, gameState)) {
+    if (this.isOccupiedByUnit(goal, gameState) || !this.isInPlayableArea(goal, gameState)) {
+      return [];
+    }
+    
+    // Check if goal has impassable obstacle
+    const goalTile = gameState.getTileAt(goal);
+    if (goalTile?.obstacle?.movementCost === Infinity) {
       return [];
     }
     
@@ -153,13 +162,25 @@ export class PathfindingService {
   }
 
   /**
-   * Check if hex is occupied by any unit
+   * Get movement cost for a hex (includes obstacle costs)
+   * 
+   * @param coord Hex coordinate
+   * @param gameState Current game state
+   * @returns Movement cost (0 = normal, 0.5 = difficult, Infinity = impassable)
+   */
+  private static getMovementCost(coord: HexCoordinate, gameState: GameState): number {
+    const tile = gameState.getTileAt(coord);
+    return tile?.obstacle?.movementCost ?? 0;
+  }
+
+  /**
+   * Check if hex is occupied by a unit
    * 
    * @param coord Hex coordinate to check
    * @param gameState Current game state
-   * @returns True if hex is occupied
+   * @returns True if hex is occupied by a unit
    */
-  private static isOccupied(coord: HexCoordinate, gameState: GameState): boolean {
+  private static isOccupiedByUnit(coord: HexCoordinate, gameState: GameState): boolean {
     const key = HexUtils.toKey(coord);
     
     // Check player units

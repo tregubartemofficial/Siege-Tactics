@@ -6,6 +6,7 @@
 import { HexCoordinate } from './HexCoordinate';
 import { Unit } from './Unit';
 import { VisibilityState } from '../services/VisionService';
+import { Obstacle } from './Obstacle';
 
 export class HexTile {
   public coordinate: HexCoordinate;
@@ -13,6 +14,7 @@ export class HexTile {
   public isExplored: boolean = false;
   public isInBounds: boolean = true;
   public occupiedBy: Unit | null = null;
+  public obstacle: Obstacle | null = null;
   public visibilityForPlayer: VisibilityState = VisibilityState.UNEXPLORED;
 
   constructor(coordinate: HexCoordinate) {
@@ -20,11 +22,11 @@ export class HexTile {
   }
 
   isEmpty(): boolean {
-    return this.occupiedBy === null;
+    return this.occupiedBy === null && (this.obstacle === null || this.obstacle.movementCost < Infinity);
   }
 
   canMoveTo(): boolean {
-    return this.isEmpty() && this.isInBounds;
+    return this.occupiedBy === null && this.isInBounds && (this.obstacle === null || this.obstacle.movementCost < Infinity);
   }
 
   /**
