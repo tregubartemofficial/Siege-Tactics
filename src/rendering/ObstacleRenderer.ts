@@ -3,6 +3,32 @@ import { HexCoordinate } from '../models/HexCoordinate';
 import { Obstacle } from '../models/Obstacle';
 import { HexTile } from '../models/HexTile';
 import { Logger } from '../utils/Logger';
+import rockGreyLarge from '../assets/PNG/Objects/rockGrey_large.png';
+import rockBrownLarge from '../assets/PNG/Objects/rockBrown_large.png';
+import rockGreySmall1 from '../assets/PNG/Objects/rockGrey_small1.png';
+import rockGreySmall2 from '../assets/PNG/Objects/rockGrey_small2.png';
+import rockGreySmall3 from '../assets/PNG/Objects/rockGrey_small3.png';
+import treePineLarge from '../assets/PNG/Objects/treePine_large.png';
+import treeRoundLarge from '../assets/PNG/Objects/treeRound_large.png';
+import ruinsCorner from '../assets/PNG/Objects/ruinsCorner.png';
+import ruinsBrick1 from '../assets/PNG/Objects/ruins_brick1.png';
+import castleLarge from '../assets/PNG/Objects/castle_large.png';
+import church from '../assets/PNG/Objects/church.png';
+
+/*
+
+      'src/assets/PNG/Objects/rockGrey_large.png',
+      'src/assets/PNG/Objects/rockBrown_large.png',
+      'src/assets/PNG/Objects/rockGrey_small1.png',
+      'src/assets/PNG/Objects/rockGrey_small2.png',
+      'src/assets/PNG/Objects/rockGrey_small3.png',
+      'src/assets/PNG/Objects/treePine_large.png',
+      'src/assets/PNG/Objects/treeRound_large.png',
+      'src/assets/PNG/Objects/ruinsCorner.png',
+      'src/assets/PNG/Objects/ruins_brick1.png',
+      'src/assets/PNG/Objects/castle_large.png',
+      'src/assets/PNG/Objects/church.png'
+*/
 
 /**
  * ObstacleRenderer - Renders obstacles on the battlefield
@@ -21,17 +47,17 @@ export class ObstacleRenderer {
   public async preloadAssets(): Promise<void> {
     // Preload all obstacle images
     const assetPaths = [
-      'src/assets/PNG/Objects/rockGrey_large.png',
-      'src/assets/PNG/Objects/rockBrown_large.png',
-      'src/assets/PNG/Objects/rockGrey_small1.png',
-      'src/assets/PNG/Objects/rockGrey_small2.png',
-      'src/assets/PNG/Objects/rockGrey_small3.png',
-      'src/assets/PNG/Objects/treePine_large.png',
-      'src/assets/PNG/Objects/treeRound_large.png',
-      'src/assets/PNG/Objects/ruinsCorner.png',
-      'src/assets/PNG/Objects/ruins_brick1.png',
-      'src/assets/PNG/Objects/castle_large.png',
-      'src/assets/PNG/Objects/church.png'
+      rockGreyLarge,
+      rockBrownLarge,
+      rockGreySmall1,
+      rockGreySmall2,
+      rockGreySmall3,
+      treePineLarge,
+      treeRoundLarge,
+      ruinsCorner,
+      ruinsBrick1,
+      castleLarge,
+      church
     ];
 
     const loadPromises = assetPaths.map(path => this.loadImage(path));

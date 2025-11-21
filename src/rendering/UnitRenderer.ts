@@ -2,6 +2,9 @@ import { GameState } from '../core/GameState';
 import { Unit } from '../models/Unit';
 import { HexCoordinate } from '../models/HexCoordinate';
 import { WeaponType } from '../utils/Constants';
+import turretSmall from '../assets/catapult.png';
+import turretMedium from '../assets/ballista.png';
+import turretLarge from '../assets/trebuchet.png';
 
 /**
  * Renders units (siege weapons) on the battlefield
@@ -28,9 +31,9 @@ export class UnitRenderer {
    */
   private loadSprites(): void {
     const spriteMap = {
-      catapult: '/src/assets/catapult.png',
-      ballista: '/src/assets/ballista.png',
-      trebuchet: '/src/assets/trebuchet.png'
+      catapult: turretSmall,
+      ballista: turretMedium,
+      trebuchet: turretLarge
     };
 
     let loadedCount = 0;
