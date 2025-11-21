@@ -23,6 +23,7 @@ export class GameState {
   public hoveredHex: HexCoordinate | null = null;
   public validMoveHexes: HexCoordinate[] = [];
   public validAttackHexes: HexCoordinate[] = [];
+  public plannedPath: HexCoordinate[] = [];
   public isAnimating: boolean = false;
 
   public initialize(playerWeapon: WeaponType): void {
@@ -73,6 +74,7 @@ export class GameState {
     this.selectedUnit = null;
     this.validMoveHexes = [];
     this.validAttackHexes = [];
+    this.plannedPath = [];
     
     if (newTurn === 'player') {
       this.turnCount++;

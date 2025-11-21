@@ -6,13 +6,15 @@
 import { EventBus } from './EventBus';
 import { GameState } from './GameState';
 import { Renderer } from '../rendering/Renderer';
+import { InteractionController } from '../ui/InteractionController';
 import { WeaponType } from '../utils/Constants';
 import { Logger } from '../utils/Logger';
 
 export class GameEngine {
-  private gameState: GameState;
+  public gameState: GameState;
   private eventBus: EventBus;
   private renderer: Renderer;
+  private interactionController: InteractionController | null = null;
   private animationFrameId: number | null = null;
   private lastFrameTime: number = 0;
 
@@ -34,6 +36,15 @@ export class GameEngine {
   public initialize(selectedWeapon: WeaponType): void {
     Logger.info(`Initializing game with weapon: ${selectedWeapon}`);
     this.gameState.initialize(selectedWeapon);
+    
+    // Initialize interaction controller after game state is ready
+    if (!this.interactionController) {
+      this.interactionController = new InteractionController(
+        this.renderer['canvas'],
+        this.gameState
+      );
+    }
+    
     this.startGameLoop();
     this.eventBus.emit('gameInitialized', this.gameState);
   }
@@ -116,6 +127,10 @@ export class GameEngine {
 
   public destroy(): void {
     this.stopGameLoop();
+    if (this.interactionController) {
+      this.interactionController.destroy();
+      this.interactionController = null;
+    }
     this.eventBus.removeAllListeners();
     Logger.info('GameEngine destroyed');
   }

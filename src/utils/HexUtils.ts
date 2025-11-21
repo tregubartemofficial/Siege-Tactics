@@ -39,7 +39,7 @@ export class HexUtils {
    * Get all 6 neighboring hexes
    */
   static neighbors(hex: HexCoordinate): HexCoordinate[] {
-    const directions = [
+    const directions: [number, number, number][] = [
       [+1, -1, 0], [+1, 0, -1], [0, +1, -1],
       [-1, +1, 0], [-1, 0, +1], [0, -1, +1]
     ];

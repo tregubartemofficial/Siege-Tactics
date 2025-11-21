@@ -1,6 +1,7 @@
 import { GameState } from '../core/GameState';
 import { BattlefieldRenderer } from './BattlefieldRenderer';
 import { UnitRenderer } from './UnitRenderer';
+import { PathRenderer } from './PathRenderer';
 
 /**
  * Main rendering orchestrator that manages all rendering subsystems
@@ -11,6 +12,7 @@ export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private battlefieldRenderer: BattlefieldRenderer;
   private unitRenderer: UnitRenderer;
+  private pathRenderer: PathRenderer;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -23,6 +25,7 @@ export class Renderer {
     this.ctx = context;
     this.battlefieldRenderer = new BattlefieldRenderer(canvas);
     this.unitRenderer = new UnitRenderer(context, 35, canvas); // hexSize = 35
+    this.pathRenderer = new PathRenderer(context, 35, canvas); // hexSize = 35
     
     // Handle high-DPI displays
     this.setupHighDPI();
@@ -38,6 +41,7 @@ export class Renderer {
     
     // Render layers in order (back to front)
     this.battlefieldRenderer.render(gameState);
+    this.pathRenderer.render(gameState); // Path overlays after battlefield
     this.unitRenderer.render(gameState);
     
     // TODO: Effects rendering (Story 05)

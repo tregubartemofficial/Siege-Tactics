@@ -7,6 +7,8 @@ import { GameEngine } from './core/GameEngine';
 import { UIController } from './ui/UIController';
 import { ProgressRepository } from './services/ProgressRepository';
 import { Logger } from './utils/Logger';
+import { PathfindingService } from './services/PathfindingService';
+import { HexUtils } from './utils/HexUtils';
 import './styles/main.css';
 
 class SiegeTactics {
@@ -59,4 +61,16 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Make game instance globally accessible for UI callbacks
   (window as any).siegeTactics = game;
+  
+  // Expose PathfindingService for testing in console
+  (window as any).PathfindingService = PathfindingService;
+  (window as any).HexUtils = HexUtils;
+  
+  Logger.info('=== Path Visualization Ready! ===');
+  Logger.info('1. Start battle: siegeTactics.startBattle("catapult")');
+  Logger.info('2. Click on your unit (blue/green/purple) to select it');
+  Logger.info('3. Hover over hexes to see the path (yellow animated line)');
+  Logger.info('4. Click on a highlighted hex to move there');
+  Logger.info('5. Blue overlay = reachable hexes, Yellow number = movement cost');
 });
+
