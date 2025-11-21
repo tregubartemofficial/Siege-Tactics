@@ -88,12 +88,21 @@ export class Renderer {
     if (!container) return;
     
     // Get container dimensions
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+    let containerWidth = container.clientWidth;
+    let containerHeight = container.clientHeight;
     
-    // Set canvas size to fill container
-    this.canvas.width = containerWidth;
-    this.canvas.height = containerHeight;
+    // Fallback to window dimensions if container has no size
+    if (containerWidth === 0 || containerHeight === 0) {
+      containerWidth = window.innerWidth;
+      containerHeight = window.innerHeight;
+    }
+    
+    // Ensure minimum size
+    const minWidth = 320;
+    const minHeight = 240;
+    
+    this.canvas.width = Math.max(containerWidth, minWidth);
+    this.canvas.height = Math.max(containerHeight, minHeight);
   }
 
   /**
