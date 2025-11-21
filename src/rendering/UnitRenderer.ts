@@ -12,12 +12,44 @@ export class UnitRenderer {
   private hexSize: number;
   private centerX: number;
   private centerY: number;
+  private sprites: Map<WeaponType, HTMLImageElement> = new Map();
+  private spritesLoaded: boolean = false;
 
   constructor(ctx: CanvasRenderingContext2D, hexSize: number, canvas: HTMLCanvasElement) {
     this.ctx = ctx;
     this.hexSize = hexSize;
     this.centerX = canvas.width / 2;
     this.centerY = canvas.height / 2;
+    this.loadSprites();
+  }
+
+  /**
+   * Load weapon sprites
+   */
+  private loadSprites(): void {
+    const spriteMap = {
+      catapult: '/src/assets/catapult.png',
+      ballista: '/src/assets/ballista.png',
+      trebuchet: '/src/assets/trebuchet.png'
+    };
+
+    let loadedCount = 0;
+    const totalSprites = Object.keys(spriteMap).length;
+
+    Object.entries(spriteMap).forEach(([weapon, path]) => {
+      const img = new Image();
+      img.src = path;
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === totalSprites) {
+          this.spritesLoaded = true;
+        }
+      };
+      img.onerror = () => {
+        console.error(`Failed to load sprite: ${path}`);
+      };
+      this.sprites.set(weapon as WeaponType, img);
+    });
   }
 
   /**
@@ -55,41 +87,74 @@ export class UnitRenderer {
   }
 
   /**
-   * Draw weapon sprite as colored shape (placeholder for actual sprites)
-   * Different sizes and colors for each weapon type
+   * Draw weapon sprite image or fallback to colored shape
    */
   private drawWeaponSprite(
     weaponType: WeaponType, 
     position: {x: number, y: number}, 
     isAI: boolean
   ): void {
-    const ctx = this.ctx;
+    const sprite = this.sprites.get(weaponType);
     
-    // Set color based on owner and weapon type
-    ctx.fillStyle = this.getWeaponColor(weaponType, isAI);
-    
-    // Draw shape based on weapon type
-    ctx.beginPath();
-    switch(weaponType) {
-      case 'catapult':
-        // Small square - 20x20px
-        ctx.rect(position.x - 10, position.y - 10, 20, 20);
-        break;
-      case 'ballista':
-        // Tall rectangle - 15x25px
-        ctx.rect(position.x - 7.5, position.y - 12.5, 15, 25);
-        break;
-      case 'trebuchet':
-        // Large square - 30x30px
-        ctx.rect(position.x - 15, position.y - 15, 30, 30);
-        break;
+    // Use sprite if loaded, otherwise fallback to colored shape
+    if (this.spritesLoaded && sprite && sprite.complete) {
+      const size = this.getSpriteSize(weaponType);
+      
+      // Draw sprite
+      this.ctx.save();
+      this.ctx.globalAlpha = 1.0;
+      this.ctx.drawImage(
+        sprite,
+        position.x - size / 2,
+        position.y - size / 2,
+        size,
+        size
+      );
+      
+      // Tint AI units red
+      if (isAI) {
+        this.ctx.globalCompositeOperation = 'multiply';
+        this.ctx.fillStyle = '#ff8888';
+        this.ctx.fillRect(
+          position.x - size / 2,
+          position.y - size / 2,
+          size,
+          size
+        );
+      }
+      
+      this.ctx.restore();
+    } else {
+      // Fallback to colored shapes
+      const ctx = this.ctx;
+      ctx.fillStyle = this.getWeaponColor(weaponType, isAI);
+      
+      ctx.beginPath();
+      switch(weaponType) {
+        case 'catapult':
+          ctx.rect(position.x - 10, position.y - 10, 20, 20);
+          break;
+        case 'ballista':
+          ctx.rect(position.x - 7.5, position.y - 12.5, 15, 25);
+          break;
+        case 'trebuchet':
+          ctx.rect(position.x - 15, position.y - 15, 30, 30);
+          break;
+      }
+      ctx.fill();
     }
-    ctx.fill();
-    
-    // Add border to sprite for definition
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+  }
+
+  /**
+   * Get sprite size based on weapon type
+   */
+  private getSpriteSize(weaponType: WeaponType): number {
+    switch(weaponType) {
+      case 'catapult': return 40;
+      case 'ballista': return 50;
+      case 'trebuchet': return 60;
+      default: return 40;
+    }
   }
 
   /**

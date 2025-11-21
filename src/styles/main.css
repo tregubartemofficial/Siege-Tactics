@@ -613,6 +613,11 @@ body {
     gap: 8px;
   }
   
+  .canvas-container {
+    height: calc(100vh - 125px); /* Subtract top-hud (45px) + bottom-panel (80px) */
+    margin-top: 45px;
+  }
+  
   .unit-info {
     font-size: 12px;
   }
@@ -662,13 +667,18 @@ body {
   
   .bottom-panel {
     height: 70px;
-    margin-bottom: 50px;
+  }
+  
+  .canvas-container {
+    height: calc(100vh - 110px); /* Subtract top-hud (40px) + bottom-panel (70px) */
+    margin-top: 40px;
   }
   
   .menu-container {
-    margin-top: -100px;
     padding: 12px;
     max-height: 80vh;
+    overflow-y: auto;
+    margin-bottom: 50px;
   }
   
   #xp-value {
@@ -684,6 +694,11 @@ body {
   
   .bottom-panel {
     height: 60px;
+  }
+  
+  .canvas-container {
+    height: calc(100vh - 95px); /* Subtract top-hud (35px) + bottom-panel (60px) */
+    margin-top: 35px;
   }
   
   .menu-container {
