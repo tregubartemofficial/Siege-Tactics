@@ -5,20 +5,21 @@
 
 import { EventBus } from './EventBus';
 import { GameState } from './GameState';
+import { Renderer } from '../rendering/Renderer';
 import { WeaponType } from '../utils/Constants';
 import { Logger } from '../utils/Logger';
 
 export class GameEngine {
   private gameState: GameState;
   private eventBus: EventBus;
+  private renderer: Renderer;
   private animationFrameId: number | null = null;
   private lastFrameTime: number = 0;
-  private canvas: HTMLCanvasElement;
 
   constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
     this.eventBus = EventBus.getInstance();
     this.gameState = new GameState();
+    this.renderer = new Renderer(canvas);
     
     this.setupEventListeners();
     Logger.info('GameEngine initialized');
@@ -57,7 +58,7 @@ export class GameEngine {
   }
 
   private render(): void {
-    this.eventBus.emit('render', this.gameState);
+    this.renderer.render(this.gameState);
   }
 
   private handleUnitSelected(unitId: string): void {

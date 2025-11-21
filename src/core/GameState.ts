@@ -114,7 +114,7 @@ export class GameState {
     return Array.from(this.battlefield.values());
   }
 
-  public update(deltaTime: number): void {
+  public update(_deltaTime: number): void {
     // Update animations, timers, etc. (to be implemented)
   }
 }

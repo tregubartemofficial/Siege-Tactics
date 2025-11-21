@@ -4,7 +4,7 @@
  */
 
 export class Logger {
-  private static isDevelopment = import.meta.env.DEV;
+  private static isDevelopment = true; // Always log in development
 
   static info(message: string, ...args: any[]): void {
     if (this.isDevelopment) {

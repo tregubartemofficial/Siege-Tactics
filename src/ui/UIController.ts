@@ -16,7 +16,6 @@ export class UIController {
   private battleUIEl: HTMLElement | null;
   private victoryScreenEl: HTMLElement | null;
   private helpOverlayEl: HTMLElement | null;
-  private progressManager: ProgressManager | null = null;
   private selectedWeapon: WeaponType = 'catapult';
 
   constructor() {
@@ -71,7 +70,8 @@ export class UIController {
   }
 
   public showMainMenu(progress: PlayerProgress): void {
-    this.progressManager = new ProgressManager(progress);
+    // Create manager for this session (not stored as property)
+    new ProgressManager(progress);
     this.hideAll();
     
     if (this.mainMenuEl) {
