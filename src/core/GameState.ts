@@ -20,6 +20,7 @@ export class GameState {
   public selectedUnit: Unit | null = null;
   public shrinkRadius: number = CONSTANTS.GRID_RADIUS;
   public turnCount: number = 0;
+  public enemiesDestroyedByPlayer: number = 0;
   
   // Fog of War
   public visionService: VisionService;
@@ -40,6 +41,7 @@ export class GameState {
     this.spawnUnits(playerWeapon);
     this.currentTurn = 'player';
     this.turnCount = 0;
+    this.enemiesDestroyedByPlayer = 0;
     this.visionService.reset();
     
     // Initial vision calculation

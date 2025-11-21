@@ -207,10 +207,9 @@ export class CombatService {
     }
     
     // Award XP if player got the kill
-    if (attacker.owner === 'player') {
-      // XP awarding will be handled by ProgressRepository in Story 05
-      // For now, just log it
-      Logger.info(`Player earned ${CONSTANTS.XP_PER_KILL} XP!`);
+    if (attacker.owner === 'player' && destroyed.owner === 'ai') {
+      gameState.enemiesDestroyedByPlayer++;
+      Logger.info(`Player earned ${CONSTANTS.XP_PER_KILL} XP! Total enemies destroyed: ${gameState.enemiesDestroyedByPlayer}`);
     }
     
     // Clear selection if destroyed unit was selected

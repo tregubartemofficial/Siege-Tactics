@@ -171,7 +171,7 @@ export class UIController {
     }
   }
 
-  private showVictoryScreen(result: 'victory' | 'defeat', xpEarned: number): void {
+  private showVictoryScreen(result: 'victory' | 'defeat', xpEarned: number, turnsTaken: number = 0, enemiesDestroyed: number = 0): void {
     this.hideAll();
     
     if (this.victoryScreenEl) {
@@ -185,6 +185,18 @@ export class UIController {
 
       // Update stats
       document.getElementById('xp-earned')!.textContent = `+${xpEarned}`;
+      
+      // Update turn count if element exists
+      const turnsEl = document.getElementById('turns-taken');
+      if (turnsEl) {
+        turnsEl.textContent = turnsTaken.toString();
+      }
+      
+      // Update enemies destroyed if element exists
+      const enemiesEl = document.getElementById('enemies-destroyed');
+      if (enemiesEl) {
+        enemiesEl.textContent = enemiesDestroyed.toString();
+      }
       
       // Update progress
       const progress = ProgressRepository.load();
@@ -272,11 +284,11 @@ export class UIController {
   private handleGameEnded(data: { victor: 'player' | 'ai'; state: any }): void {
     Logger.info('Game ended', data);
     
-    // Calculate XP earned (50 per enemy destroyed)
-    const enemiesDestroyed = 1; // TODO: Get from game state
-    const xpEarned = enemiesDestroyed * 50;
+    // Calculate XP earned only from enemies destroyed by player
+    const enemiesDestroyed = data.state.enemiesDestroyedByPlayer || 0;
+    const xpEarned = data.victor === 'player' ? enemiesDestroyed * 50 : 0;
     
     const result = data.victor === 'player' ? 'victory' : 'defeat';
-    this.showVictoryScreen(result, xpEarned);
+    this.showVictoryScreen(result, xpEarned, data.state.turnCount || 0, enemiesDestroyed);
   }
 }
