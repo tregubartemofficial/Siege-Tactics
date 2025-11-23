@@ -11,10 +11,11 @@ import { CONSTANTS } from '../utils/Constants';
 export class PathfindingService {
   /**
    * Calculate all hexes reachable within movement range
-   * Uses flood fill algorithm to find all valid destinations
+   * Uses breadth-first flood fill with movement cost tracking
+   * Respects obstacles that block or slow movement
    * 
    * @param start Starting hex coordinate
-   * @param movementRange Maximum movement distance
+   * @param movementRange Maximum movement points available
    * @param gameState Current game state for obstacle checking
    * @returns Array of reachable hex coordinates
    */
@@ -24,37 +25,50 @@ export class PathfindingService {
     gameState: GameState
   ): HexCoordinate[] {
     const reachable: HexCoordinate[] = [];
-    const visited = new Set<string>();
+    const visited = new Map<string, number>(); // key -> cost to reach
     
-    // Flood fill with cost tracking (not just distance)
+    // BFS flood fill tracking actual movement cost
     const queue: Array<{coord: HexCoordinate, cost: number}> = [{coord: start, cost: 0}];
+    visited.set(HexUtils.toKey(start), 0);
     
     while (queue.length > 0) {
       const {coord, cost} = queue.shift()!;
-      const key = HexUtils.toKey(coord);
       
-      if (visited.has(key)) continue;
-      visited.add(key);
-      
-      // Add to reachable if within range and not the starting position
-      if (cost > 0 && cost <= movementRange) {
+      // Add to reachable if not the starting position
+      if (cost > 0) {
         // Can only stop on unoccupied hexes
         if (!this.isOccupiedByUnit(coord, gameState) && this.isInPlayableArea(coord, gameState)) {
           reachable.push(coord);
         }
       }
       
-      // Explore neighbors if within movement range
+      // Explore neighbors if we have movement points left
       if (cost < movementRange) {
-        const neighbors = this.getValidNeighbors(coord, gameState);
-        neighbors.forEach(neighbor => {
-          if (!visited.has(HexUtils.toKey(neighbor))) {
-            const moveCost = this.getMovementCost(neighbor, gameState);
-            if (moveCost < Infinity) { // Can traverse
-              queue.push({coord: neighbor, cost: cost + 1 + moveCost});
-            }
+        const neighbors = HexUtils.neighbors(coord);
+        
+        for (const neighbor of neighbors) {
+          // Must be in bounds and playable area
+          if (!HexUtils.inBounds(neighbor, CONSTANTS.GRID_RADIUS)) continue;
+          if (!this.isInPlayableArea(neighbor, gameState)) continue;
+          
+          // Calculate movement cost (1 + obstacle penalty)
+          const moveCost = this.getMovementCost(neighbor, gameState);
+          
+          // Skip impassable tiles (Infinity cost = blocked by obstacle)
+          if (moveCost === Infinity) continue;
+          
+          // Each hex costs 1 movement point + obstacle penalty
+          const newCost = cost + 1 + moveCost;
+          
+          // Only visit if within range and cheaper than before
+          const neighborKey = HexUtils.toKey(neighbor);
+          const previousCost = visited.get(neighborKey) ?? Infinity;
+          
+          if (newCost <= movementRange && newCost < previousCost) {
+            visited.set(neighborKey, newCost);
+            queue.push({coord: neighbor, cost: newCost});
           }
-        });
+        }
       }
     }
     
@@ -122,7 +136,10 @@ export class PathfindingService {
       const neighbors = this.getValidNeighbors(current, gameState);
       neighbors.forEach(neighbor => {
         const neighborKey = HexUtils.toKey(neighbor);
-        const tentativeGScore = (gScore.get(currentKey) ?? Infinity) + 1;
+        
+        // Calculate actual movement cost (1 + obstacle penalty)
+        const moveCost = this.getMovementCost(neighbor, gameState);
+        const tentativeGScore = (gScore.get(currentKey) ?? Infinity) + 1 + moveCost;
         
         if (tentativeGScore < (gScore.get(neighborKey) ?? Infinity)) {
           cameFrom.set(neighborKey, current!);
@@ -141,7 +158,7 @@ export class PathfindingService {
   }
 
   /**
-   * Get all valid neighboring hexes (in bounds and not blocked)
+   * Get all valid neighboring hexes (in bounds, not blocked by obstacles)
    * 
    * @param coord Current hex coordinate
    * @param gameState Current game state
@@ -154,6 +171,10 @@ export class PathfindingService {
       
       // Must be in playable area (not in shrink zone)
       if (!this.isInPlayableArea(neighbor, gameState)) return false;
+      
+      // Cannot path through impassable obstacles (Infinity cost)
+      const moveCost = this.getMovementCost(neighbor, gameState);
+      if (moveCost === Infinity) return false;
       
       // Can traverse through occupied hexes for pathfinding
       // (but can't stop on them - checked in getReachableHexes and goal validation)
