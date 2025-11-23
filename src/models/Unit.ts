@@ -16,6 +16,7 @@ export class Unit {
   public maxHealth: number;
   public hasMovedThisTurn: boolean = false;
   public hasAttackedThisTurn: boolean = false;
+  public movementPointsUsed: number = 0; // Track how many movement points used this turn
   private weaponStats: WeaponStats;
 
   constructor(id: string, type: WeaponType, owner: PlayerType, position: HexCoordinate) {
@@ -30,6 +31,17 @@ export class Unit {
 
   getMovementRange(): number {
     return this.weaponStats.movementRange;
+  }
+
+  getRemainingMovement(): number {
+    return Math.max(0, this.getMovementRange() - this.movementPointsUsed);
+  }
+
+  canMove(): boolean {
+    // Can't move after attacking
+    if (this.hasAttackedThisTurn) return false;
+    // Can move if has movement points left
+    return this.getRemainingMovement() > 0;
   }
 
   getAttackRange(): { min: number; max: number } {
@@ -58,10 +70,7 @@ export class Unit {
   resetTurnActions(): void {
     this.hasMovedThisTurn = false;
     this.hasAttackedThisTurn = false;
-  }
-
-  canMove(): boolean {
-    return !this.hasMovedThisTurn;
+    this.movementPointsUsed = 0;
   }
 
   canAttack(): boolean {

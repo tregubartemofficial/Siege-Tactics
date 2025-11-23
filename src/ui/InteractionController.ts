@@ -1,5 +1,6 @@
 import { GameState } from '../core/GameState';
 import { HexCoordinate } from '../models/HexCoordinate';
+import { Unit } from '../models/Unit';
 import { HexUtils } from '../utils/HexUtils';
 import { PathfindingService } from '../services/PathfindingService';
 import { CombatService } from '../services/CombatService';
@@ -196,29 +197,41 @@ export class InteractionController {
   private selectUnit(unitId: string): void {
     const unit = this.gameState.playerUnits.find(u => u.id === unitId);
 
-    if (!unit || !unit.isAlive() || !unit.canMove()) {
+    if (!unit || !unit.isAlive()) {
       Logger.info('Cannot select this unit');
       return;
     }
 
     this.gameState.selectedUnit = unit;
-    
-    // Calculate reachable hexes for movement
-    this.gameState.validMoveHexes = PathfindingService.getReachableHexes(
-      unit.position,
-      unit.getMovementRange(),
-      this.gameState
-    );
-
-    // Calculate attack range
-    this.gameState.validAttackHexes = CombatService.getAttackRange(
-      unit,
-      this.gameState
-    );
+    this.updateValidHexes(unit);
 
     Logger.info(`Selected ${unit.type} at (${unit.position.q}, ${unit.position.r})`);
+    Logger.info(`Movement: ${unit.getRemainingMovement()}/${unit.getMovementRange()}`);
     Logger.info(`Can move to ${this.gameState.validMoveHexes.length} hexes`);
     Logger.info(`Can attack ${this.gameState.validAttackHexes.length} hexes`);
+  }
+
+  private updateValidHexes(unit: Unit): void {
+    // Calculate reachable hexes using remaining movement
+    if (unit.canMove()) {
+      this.gameState.validMoveHexes = PathfindingService.getReachableHexes(
+        unit.position,
+        unit.getRemainingMovement(),
+        this.gameState
+      );
+    } else {
+      this.gameState.validMoveHexes = [];
+    }
+
+    // Calculate attack range
+    if (unit.canAttack()) {
+      this.gameState.validAttackHexes = CombatService.getAttackRange(
+        unit,
+        this.gameState
+      );
+    } else {
+      this.gameState.validAttackHexes = [];
+    }
   }
 
   private deselectUnit(): void {
@@ -232,6 +245,14 @@ export class InteractionController {
   private tryMoveUnit(destination: HexCoordinate): void {
     if (!this.gameState.selectedUnit) return;
 
+    const unit = this.gameState.selectedUnit;
+
+    // Check if unit can move (not after attacking)
+    if (!unit.canMove()) {
+      Logger.info('Cannot move after attacking');
+      return;
+    }
+
     // Check if destination is valid
     const isValidMove = this.gameState.validMoveHexes.some(hex =>
       HexUtils.equals(hex, destination)
@@ -242,13 +263,24 @@ export class InteractionController {
       return;
     }
 
+    // Calculate movement cost (includes obstacle penalties)
+    const path = PathfindingService.findPath(unit.position, destination, this.gameState);
+    let movementCost = 0;
+    
+    // Calculate actual cost including obstacles
+    for (const hex of path) {
+      const tile = this.gameState.getTileAt(hex);
+      const obstacleCost = tile?.obstacle?.movementCost ?? 0;
+      movementCost += 1 + obstacleCost; // 1 base + obstacle penalty
+    }
+
     // Move the unit
-    const unit = this.gameState.selectedUnit;
     const oldPos = unit.position;
     unit.position = destination;
+    unit.movementPointsUsed += movementCost;
     unit.hasMovedThisTurn = true;
 
-    Logger.info(`Moved ${unit.type} from (${oldPos.q}, ${oldPos.r}) to (${destination.q}, ${destination.r})`);
+    Logger.info(`Moved ${unit.type} from (${oldPos.q}, ${oldPos.r}) to (${destination.q}, ${destination.r}) - Used ${movementCost} movement (${unit.getRemainingMovement()} remaining)`);
 
     // Emit event for move sound
     EventBus.getInstance().emit('unitMoved', { unitId: unit.id, from: oldPos, to: destination });
@@ -256,11 +288,16 @@ export class InteractionController {
     // Update fog of war after movement
     this.gameState.updateVision();
 
-    // Clear selection
-    this.gameState.selectedUnit = null;
-    this.gameState.validMoveHexes = [];
-    this.gameState.validAttackHexes = [];
-    this.gameState.hoveredHex = null;
+    // Update valid move/attack hexes for remaining movement
+    this.updateValidHexes(unit);
+
+    // Keep unit selected if it still has movement or can attack
+    if (!unit.canMove() && !unit.canAttack()) {
+      this.gameState.selectedUnit = null;
+      this.gameState.validMoveHexes = [];
+      this.gameState.validAttackHexes = [];
+      this.gameState.hoveredHex = null;
+    }
   }
 
   private tryAttackUnit(target: HexCoordinate): void {
@@ -305,12 +342,13 @@ export class InteractionController {
         }
       }
 
-      // Keep unit selected if they can still move
-      if (!attacker.canMove()) {
-        this.gameState.selectedUnit = null;
-        this.gameState.validMoveHexes = [];
-        this.gameState.validAttackHexes = [];
-      }
+      // After attacking, unit can no longer move
+      attacker.hasMovedThisTurn = true;
+
+      // Clear selection and valid hexes
+      this.gameState.selectedUnit = null;
+      this.gameState.validMoveHexes = [];
+      this.gameState.validAttackHexes = [];
     } else {
       Logger.warn('Attack failed');
     }
