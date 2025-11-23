@@ -161,6 +161,12 @@ export class SoundService {
       return;
     }
 
+    // Prevent starting music if already playing
+    if (!this.backgroundMusic.paused) {
+      console.log('[SoundService] Background music already playing');
+      return;
+    }
+
     try {
       // Start at low volume and fade in
       this.backgroundMusic.volume = 0;

@@ -267,6 +267,9 @@ export class GameEngine {
       this.interactionController.destroy();
       this.interactionController = null;
     }
+    if (this.soundService) {
+      this.soundService.dispose();
+    }
     this.eventBus.removeAllListeners();
     Logger.info('GameEngine destroyed');
   }

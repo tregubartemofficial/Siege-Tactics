@@ -41,6 +41,12 @@ class SiegeTactics {
   public startBattle(selectedWeapon: string): void {
     Logger.info(`Starting battle with weapon: ${selectedWeapon}`);
     
+    // Clean up old game engine if exists (prevents duplicate music)
+    if (this.gameEngine) {
+      this.gameEngine.destroy();
+      this.gameEngine = null;
+    }
+    
     const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
     this.gameEngine = new GameEngine(canvas);
     this.gameEngine.initialize(selectedWeapon as any);
