@@ -6,6 +6,7 @@ import { CombatService } from './CombatService';
 import { HexUtils } from '../utils/HexUtils';
 import { Logger } from '../utils/Logger';
 import { EventBus } from '../core/EventBus';
+import { CONSTANTS } from '../utils/Constants';
 
 /**
  * AIService - Simple Tactical AI for Enemy Units
@@ -137,7 +138,7 @@ export class AIService {
   /**
    * Attempt to move AI unit toward nearest enemy
    * Uses pathfinding to find best movement destination
-   * Respects fog of war - only moves toward visible enemies
+   * Respects fog of war - if no visible enemies, explores unseen areas
    * 
    * @param unit AI unit attempting to move
    * @param gameState Current game state
@@ -146,14 +147,6 @@ export class AIService {
   private async tryMove(unit: Unit, gameState: GameState): Promise<boolean> {
     if (unit.hasMovedThisTurn) {
       Logger.debug(`${unit.type} has already moved this turn`);
-      return false;
-    }
-    
-    // Find nearest visible player unit (respects fog of war)
-    const nearestEnemy = this.findNearestEnemy(unit, gameState.playerUnits, gameState);
-    
-    if (!nearestEnemy) {
-      Logger.debug('AI cannot see any enemies (fog of war)');
       return false;
     }
     
@@ -169,14 +162,28 @@ export class AIService {
       return false;
     }
     
-    // Choose hex at optimal range (respects minRange)
-    const destination = this.selectBestMoveDestination(
-      reachableHexes,
-      nearestEnemy.position,
-      unit
-    );
+    // Find nearest visible player unit (respects fog of war)
+    const nearestEnemy = this.findNearestEnemy(unit, gameState.playerUnits, gameState);
     
-    Logger.debug(`${unit.type} moving toward enemy at (${nearestEnemy.position.q}, ${nearestEnemy.position.r})`);
+    let destination: HexCoordinate;
+    
+    if (nearestEnemy) {
+      // Enemy visible - move toward it at optimal range
+      destination = this.selectBestMoveDestination(
+        reachableHexes,
+        nearestEnemy.position,
+        unit
+      );
+      Logger.debug(`${unit.type} moving toward visible enemy`);
+    } else {
+      // No visible enemies - explore unseen areas
+      destination = this.selectExplorationDestination(
+        reachableHexes,
+        unit.position,
+        gameState
+      );
+      Logger.debug(`${unit.type} exploring unseen territory`);
+    }
     
     // Find path to destination
     const path = PathfindingService.findPath(
@@ -260,8 +267,9 @@ export class AIService {
     targetPosition: HexCoordinate,
     unit: Unit
   ): HexCoordinate {
-    const minRange = unit.weaponType.minRange;
-    const maxRange = unit.weaponType.maxRange;
+    const weapon = unit.getWeaponStats();
+    const minRange = weapon.attackRangeMin;
+    const maxRange = weapon.attackRangeMax;
     
     // Find hexes within optimal attack range
     const optimalHexes = reachableHexes.filter(hex => {
@@ -299,6 +307,62 @@ export class AIService {
       const score = distance - minRange;
       
       if (score < bestScore) {
+        bestScore = score;
+        bestHex = hex;
+      }
+    }
+    
+    return bestHex;
+  }
+
+  /**
+   * Select exploration destination to reveal unseen territory
+   * Strategy: Move toward areas with most unseen tiles (Civ 6-style exploration)
+   * 
+   * @param reachableHexes Available movement destinations
+   * @param currentPosition Current unit position
+   * @param gameState Current game state for vision checking
+   * @returns Best hex for exploration
+   */
+  private selectExplorationDestination(
+    reachableHexes: HexCoordinate[],
+    currentPosition: HexCoordinate,
+    gameState: GameState
+  ): HexCoordinate {
+    const visionRange = 4; // Same as unit vision radius
+    
+    // Score each hex by how many unseen tiles it would reveal
+    let bestHex = reachableHexes[0];
+    let bestScore = -Infinity;
+    
+    for (const hex of reachableHexes) {
+      let score = 0;
+      
+      // Check tiles around this hex within vision range
+      for (let dq = -visionRange; dq <= visionRange; dq++) {
+        for (let dr = Math.max(-visionRange, -dq - visionRange); 
+             dr <= Math.min(visionRange, -dq + visionRange); dr++) {
+          const checkHex = HexUtils.create(hex.q + dq, hex.r + dr);
+          
+          // Must be in bounds
+          if (!HexUtils.inBounds(checkHex, CONSTANTS.GRID_RADIUS)) continue;
+          
+          // Must be in playable area
+          const center = HexUtils.create(0, 0);
+          if (HexUtils.distance(checkHex, center) > gameState.shrinkRadius) continue;
+          
+          // Score unseen tiles higher
+          const tileKey = HexUtils.toKey(checkHex);
+          if (!gameState.visionService.getAIVisibleTiles().has(tileKey)) {
+            score += 1; // Unseen tile = +1 point
+          }
+        }
+      }
+      
+      // Tie-breaker: prefer moving away from current position (avoid standing still)
+      score += HexUtils.distance(hex, currentPosition) * 0.1;
+      
+      if (score > bestScore) {
         bestScore = score;
         bestHex = hex;
       }
