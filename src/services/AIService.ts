@@ -86,7 +86,7 @@ export class AIService {
 
   /**
    * Attempt to attack with AI unit
-   * Prioritizes low-health targets
+   * Prioritizes low-health targets that are visible
    * 
    * @param unit AI unit attempting to attack
    * @param gameState Current game state
@@ -101,13 +101,18 @@ export class AIService {
     // Get valid targets in range
     const targets = CombatService.getValidTargets(unit, gameState);
     
-    if (targets.length === 0) {
-      Logger.debug(`${unit.type} has no valid targets in range`);
+    // Filter to only visible targets (fog of war)
+    const visibleTargets = targets.filter(target => 
+      gameState.visionService.isUnitVisibleToAI(target)
+    );
+    
+    if (visibleTargets.length === 0) {
+      Logger.debug(`${unit.type} has no visible targets in range`);
       return false;
     }
     
     // Choose best target (lowest health = prioritize killing)
-    const target = this.selectBestTarget(targets);
+    const target = this.selectBestTarget(visibleTargets);
     
     Logger.info(`AI ${unit.type} targeting ${target.type} (${target.health} HP)`);
     
@@ -132,6 +137,7 @@ export class AIService {
   /**
    * Attempt to move AI unit toward nearest enemy
    * Uses pathfinding to find best movement destination
+   * Respects fog of war - only moves toward visible enemies
    * 
    * @param unit AI unit attempting to move
    * @param gameState Current game state
@@ -143,11 +149,11 @@ export class AIService {
       return false;
     }
     
-    // Find nearest player unit
-    const nearestEnemy = this.findNearestEnemy(unit, gameState.playerUnits);
+    // Find nearest visible player unit (respects fog of war)
+    const nearestEnemy = this.findNearestEnemy(unit, gameState.playerUnits, gameState);
     
     if (!nearestEnemy) {
-      Logger.debug('No enemies to move toward');
+      Logger.debug('AI cannot see any enemies (fog of war)');
       return false;
     }
     
@@ -163,10 +169,11 @@ export class AIService {
       return false;
     }
     
-    // Choose hex closest to enemy
+    // Choose hex at optimal range (respects minRange)
     const destination = this.selectBestMoveDestination(
       reachableHexes,
-      nearestEnemy.position
+      nearestEnemy.position,
+      unit
     );
     
     Logger.debug(`${unit.type} moving toward enemy at (${nearestEnemy.position.q}, ${nearestEnemy.position.r})`);
@@ -213,15 +220,22 @@ export class AIService {
    * 
    * @param unit AI unit
    * @param enemies Array of enemy units
-   * @returns Nearest enemy unit, or null if no enemies
+   * @returns Nearest visible enemy unit, or null if no visible enemies
    */
-  private findNearestEnemy(unit: Unit, enemies: Unit[]): Unit | null {
+  private findNearestEnemy(unit: Unit, enemies: Unit[], gameState: GameState): Unit | null {
     if (enemies.length === 0) return null;
     
-    let nearest = enemies[0];
+    // Filter to only visible enemies (fog of war)
+    const visibleEnemies = enemies.filter(enemy => 
+      gameState.visionService.isUnitVisibleToAI(enemy)
+    );
+    
+    if (visibleEnemies.length === 0) return null;
+    
+    let nearest = visibleEnemies[0];
     let minDistance = HexUtils.distance(unit.position, nearest.position);
     
-    for (const enemy of enemies) {
+    for (const enemy of visibleEnemies) {
       const distance = HexUtils.distance(unit.position, enemy.position);
       if (distance < minDistance) {
         minDistance = distance;
@@ -234,23 +248,58 @@ export class AIService {
 
   /**
    * Select best movement destination
-   * Strategy: Move to hex closest to target (aggressive approach)
+   * Strategy: Move to optimal range (respects minRange to avoid getting too close)
    * 
    * @param reachableHexes Available movement destinations
    * @param targetPosition Target to move toward
+   * @param unit AI unit performing the movement (to check weapon minRange)
    * @returns Best hex to move to
    */
   private selectBestMoveDestination(
     reachableHexes: HexCoordinate[],
-    targetPosition: HexCoordinate
+    targetPosition: HexCoordinate,
+    unit: Unit
   ): HexCoordinate {
+    const minRange = unit.weaponType.minRange;
+    const maxRange = unit.weaponType.maxRange;
+    
+    // Find hexes within optimal attack range
+    const optimalHexes = reachableHexes.filter(hex => {
+      const distance = HexUtils.distance(hex, targetPosition);
+      return distance >= minRange && distance <= maxRange;
+    });
+    
+    // If we can reach optimal range, choose closest to target within that range
+    if (optimalHexes.length > 0) {
+      let bestHex = optimalHexes[0];
+      let minDistance = HexUtils.distance(bestHex, targetPosition);
+      
+      for (const hex of optimalHexes) {
+        const distance = HexUtils.distance(hex, targetPosition);
+        if (distance < minDistance) {
+          minDistance = distance;
+          bestHex = hex;
+        }
+      }
+      
+      return bestHex;
+    }
+    
+    // If can't reach optimal range, move as close as possible while respecting minRange
     let bestHex = reachableHexes[0];
-    let minDistance = HexUtils.distance(bestHex, targetPosition);
+    let bestScore = Math.abs(HexUtils.distance(bestHex, targetPosition) - minRange);
     
     for (const hex of reachableHexes) {
       const distance = HexUtils.distance(hex, targetPosition);
-      if (distance < minDistance) {
-        minDistance = distance;
+      
+      // Don't move closer than minRange
+      if (distance < minRange) continue;
+      
+      // Prefer getting closer to target
+      const score = distance - minRange;
+      
+      if (score < bestScore) {
+        bestScore = score;
         bestHex = hex;
       }
     }
