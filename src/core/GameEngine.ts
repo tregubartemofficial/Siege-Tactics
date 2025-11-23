@@ -227,6 +227,9 @@ export class GameEngine {
     Logger.info(`Game ended. Victor: ${victor}`);
     this.stopGameLoop();
     
+    // Clear animating state to allow UI updates
+    this.gameState.isAnimating = false;
+    
     // Stop background music with fade-out
     this.soundService.stopBackgroundMusic();
     

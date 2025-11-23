@@ -60,18 +60,22 @@ export class UnitRenderer {
    * Renders player units, AI units, and selection highlight
    */
   public render(gameState: GameState): void {
-    // Render all player units (always visible)
-    gameState.playerUnits.forEach(unit => this.drawUnit(unit, false));
+    // Render all player units (always visible, only if alive)
+    gameState.playerUnits.forEach(unit => {
+      if (unit.isAlive()) {
+        this.drawUnit(unit, false);
+      }
+    });
     
-    // Render only visible AI units (fog of war)
+    // Render only visible AI units (fog of war, only if alive)
     gameState.aiUnits.forEach(unit => {
-      if (gameState.visionService.isUnitVisibleToPlayer(unit)) {
+      if (unit.isAlive() && gameState.visionService.isUnitVisibleToPlayer(unit)) {
         this.drawUnit(unit, true);
       }
     });
     
-    // Render selection highlight if unit selected
-    if (gameState.selectedUnit) {
+    // Render selection highlight if unit selected and alive
+    if (gameState.selectedUnit && gameState.selectedUnit.isAlive()) {
       this.drawSelectionHighlight(gameState.selectedUnit);
     }
   }

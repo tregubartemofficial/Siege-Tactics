@@ -39,7 +39,15 @@ export class AIService {
       // Skip if unit was destroyed during this turn
       if (!unit.isAlive()) continue;
       
-      await this.processUnit(unit, gameState);
+      const gameEnded = await this.processUnit(unit, gameState);
+      
+      // Stop processing if game ended (player defeated)
+      if (gameEnded) {
+        Logger.info('Game ended during AI turn - stopping AI processing');
+        // Small delay to ensure final render before game end screen
+        await this.delay(800);
+        return; // Don't switch turns or continue processing
+      }
       
       // Add delay for visibility
       await this.delay(500);
@@ -57,8 +65,9 @@ export class AIService {
    * 
    * @param unit AI unit to process
    * @param gameState Current game state
+   * @returns True if game ended during processing
    */
-  private async processUnit(unit: Unit, gameState: GameState): Promise<void> {
+  private async processUnit(unit: Unit, gameState: GameState): Promise<boolean> {
     Logger.debug(`Processing AI ${unit.type} at (${unit.position.q}, ${unit.position.r})`);
     
     // Strategy: Attack if possible, otherwise move closer
@@ -68,6 +77,10 @@ export class AIService {
     
     if (attackExecuted) {
       Logger.info(`AI ${unit.type} attacked`);
+      // Check if game ended
+      if (gameState.playerUnits.length === 0) {
+        return true;
+      }
     }
     
     // 2. Try to move if haven't moved yet
@@ -82,7 +95,13 @@ export class AIService {
     // 3. Try to attack again after moving (if we can)
     if (!unit.hasAttackedThisTurn) {
       await this.tryAttack(unit, gameState);
+      // Check if game ended
+      if (gameState.playerUnits.length === 0) {
+        return true;
+      }
     }
+    
+    return false;
   }
 
   /**
